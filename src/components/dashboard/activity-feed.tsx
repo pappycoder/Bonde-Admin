@@ -29,7 +29,7 @@ export function ActivityFeed({ className }: { className?: string }) {
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Recent activity</CardTitle>
         <Button variant="ghost" size="sm" className="gap-1" asChild>
-          <Link href="/analytics">
+          <Link href="/activities">
             View all
             <ArrowUpRight className="size-3.5" />
           </Link>

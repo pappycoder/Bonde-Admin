@@ -1,14 +1,16 @@
 export const siteConfig = {
   name: "Bonde",
   fullName: "Bonde Admin",
-  tagline: "Admin Console",
+  tagline: "AI Fintech Console",
   description:
-    "A modern admin dashboard boilerplate built with Next.js, Tailwind CSS, shadcn/ui and Motion.",
+    "Admin console for Bonde — monitor users, live sessions, transactions, activities and support for the Bonde AI fintech platform.",
   url: "https://bonde.app",
+  logo: "/bonde-logo.png",
+  icon: "/bonde-icon.png",
   user: {
-    name: "Ada Lovelace",
-    email: "ada@bonde.app",
-    initials: "AL",
+    name: "Bonde Admin",
+    email: "admin@bonde.app",
+    initials: "BA",
   },
 } as const;
 

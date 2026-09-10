@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronUp, CreditCard, LogOut, Sparkles, UserRound } from "lucide-react";
+import { ChevronUp, CreditCard, LogOut, UserRound } from "lucide-react";
 
 import { navGroups } from "@/config/nav";
 import { siteConfig } from "@/config/site";
@@ -39,11 +40,23 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Sparkles className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+              <Link href="/dashboard" className="items-center gap-2">
+                <Image
+                  src={siteConfig.icon}
+                  alt={siteConfig.name}
+                  width={512}
+                  height={512}
+                  className="hidden size-8 shrink-0 rounded-lg group-data-[collapsible=icon]:block"
+                />
+                <Image
+                  src={siteConfig.logo}
+                  alt={siteConfig.name}
+                  width={318}
+                  height={113}
+                  priority
+                  className="h-7 w-auto group-data-[collapsible=icon]:hidden"
+                />
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">
                     {siteConfig.name}
                   </span>
@@ -156,9 +169,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   Billing
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <LogOut />
-                  Sign out
+                <DropdownMenuItem variant="destructive" asChild>
+                  <Link href="/login">
+                    <LogOut />
+                    Sign out
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

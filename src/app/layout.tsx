@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     template: `%s · ${siteConfig.fullName}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: "/bonde-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

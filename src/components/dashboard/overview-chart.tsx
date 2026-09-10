@@ -18,17 +18,17 @@ import {
 } from "@/components/ui/chart";
 
 const chartConfig = {
-  revenue: { label: "Revenue", color: "var(--chart-1)" },
-  expenses: { label: "Expenses", color: "var(--chart-2)" },
+  revenue: { label: "Deposits", color: "var(--chart-1)" },
+  expenses: { label: "Payouts", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
 export function OverviewChart({ className }: { className?: string }) {
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Revenue overview</CardTitle>
+        <CardTitle>Transaction volume</CardTitle>
         <CardDescription>
-          Income vs. expenses for the past 12 months
+          Deposits vs. payouts for the past 12 months
         </CardDescription>
       </CardHeader>
       <CardContent>

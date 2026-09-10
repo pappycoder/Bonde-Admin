@@ -1,9 +1,14 @@
-import { CircleDollarSign, ShoppingCart, Users, Wallet } from "lucide-react";
+import {
+  Bot,
+  CircleDollarSign,
+  LifeBuoy,
+  Users,
+} from "lucide-react";
 
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
-import { OrdersTable } from "@/components/dashboard/orders-table";
 import { OverviewChart } from "@/components/dashboard/overview-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { TransactionsTable } from "@/components/dashboard/transactions-table";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Stagger } from "@/components/motion/stagger";
@@ -15,31 +20,15 @@ export default function DashboardPage() {
       <FadeIn>
         <PageHeader
           title="Dashboard"
-          description="Welcome back — here’s what is happening with your store today."
+          description="Welcome back — here's what is happening on Bonde today."
         >
-          <Button size="sm">Export</Button>
+          <Button size="sm">Export report</Button>
         </PageHeader>
       </FadeIn>
 
       <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Total revenue"
-          value="$48,219"
-          delta="+12.5%"
-          trend="up"
-          sublabel="vs last month"
-          icon={<CircleDollarSign className="size-4" />}
-        />
-        <StatCard
-          title="New orders"
-          value="1,284"
-          delta="+8.2%"
-          trend="up"
-          sublabel="vs last month"
-          icon={<ShoppingCart className="size-4" />}
-        />
-        <StatCard
-          title="Active customers"
+          title="Active users"
           value="3,921"
           delta="+4.1%"
           trend="up"
@@ -47,12 +36,28 @@ export default function DashboardPage() {
           icon={<Users className="size-4" />}
         />
         <StatCard
-          title="Refunds"
-          value="$1,204"
-          delta="-3.4%"
+          title="Transaction volume"
+          value="$412,180"
+          delta="+12.5%"
+          trend="up"
+          sublabel="vs last month"
+          icon={<CircleDollarSign className="size-4" />}
+        />
+        <StatCard
+          title="AI decisions"
+          value="18,204"
+          delta="+8.2%"
+          trend="up"
+          sublabel="vs last month"
+          icon={<Bot className="size-4" />}
+        />
+        <StatCard
+          title="Open tickets"
+          value="26"
+          delta="-5.1%"
           trend="down"
           sublabel="vs last month"
-          icon={<Wallet className="size-4" />}
+          icon={<LifeBuoy className="size-4" />}
         />
       </Stagger>
 
@@ -61,7 +66,7 @@ export default function DashboardPage() {
         <ActivityFeed />
       </div>
 
-      <OrdersTable />
+      <TransactionsTable />
     </div>
   );
 }

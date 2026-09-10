@@ -19,86 +19,326 @@ export const revenueData: RevenuePoint[] = [
   { month: "Dec", revenue: 33200, expenses: 18400 },
 ];
 
-export type OrderStatus =
+export type UserStatus = "active" | "suspended" | "pending";
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  status: UserStatus;
+  riskScore: number;
+  balance: number;
+  lastActive: string;
+  joined: string;
+  initials: string;
+};
+
+export const users: User[] = [
+  {
+    id: "USR-1042",
+    name: "Olivia Martin",
+    email: "olivia@example.com",
+    status: "active",
+    riskScore: 12,
+    balance: 12490.5,
+    lastActive: "2 min ago",
+    joined: "Mar 2025",
+    initials: "OM",
+  },
+  {
+    id: "USR-1041",
+    name: "Jackson Lee",
+    email: "jackson@example.com",
+    status: "active",
+    riskScore: 27,
+    balance: 4380,
+    lastActive: "26 min ago",
+    joined: "Jun 2025",
+    initials: "JL",
+  },
+  {
+    id: "USR-1040",
+    name: "Isabella Nguyen",
+    email: "isabella@example.com",
+    status: "pending",
+    riskScore: 61,
+    balance: 0,
+    lastActive: "1 hour ago",
+    joined: "Aug 2026",
+    initials: "IN",
+  },
+  {
+    id: "USR-1039",
+    name: "William Kim",
+    email: "william@example.com",
+    status: "active",
+    riskScore: 8,
+    balance: 8750.25,
+    lastActive: "3 hours ago",
+    joined: "Jan 2026",
+    initials: "WK",
+  },
+  {
+    id: "USR-1038",
+    name: "Sofia Davis",
+    email: "sofia@example.com",
+    status: "suspended",
+    riskScore: 88,
+    balance: 1240,
+    lastActive: "Aug 30, 2026",
+    joined: "Nov 2025",
+    initials: "SD",
+  },
+  {
+    id: "USR-1037",
+    name: "Ethan Brown",
+    email: "ethan@example.com",
+    status: "active",
+    riskScore: 34,
+    balance: 2120,
+    lastActive: "5 hours ago",
+    joined: "Feb 2026",
+    initials: "EB",
+  },
+  {
+    id: "USR-1036",
+    name: "Mia Garcia",
+    email: "mia@example.com",
+    status: "active",
+    riskScore: 45,
+    balance: 9860,
+    lastActive: "Yesterday",
+    joined: "Apr 2026",
+    initials: "MG",
+  },
+  {
+    id: "USR-1035",
+    name: "Liam Johnson",
+    email: "liam@example.com",
+    status: "pending",
+    riskScore: 52,
+    balance: 0,
+    lastActive: "Aug 29, 2026",
+    joined: "Sep 2026",
+    initials: "LJ",
+  },
+];
+
+export type TransactionType = "deposit" | "withdrawal" | "transfer" | "payment";
+
+export type TransactionStatus =
   | "completed"
   | "processing"
   | "pending"
-  | "cancelled"
-  | "refunded";
+  | "failed"
+  | "flagged";
 
-export type Order = {
+export type Transaction = {
   id: string;
-  customer: string;
-  email: string;
-  date: string;
+  user: string;
+  userId: string;
+  type: TransactionType;
   amount: number;
-  status: OrderStatus;
+  status: TransactionStatus;
+  date: string;
+  method: string;
 };
 
-export const orders: Order[] = [
+export const transactions: Transaction[] = [
   {
-    id: "#BD-2819",
-    customer: "Olivia Martin",
-    email: "olivia@example.com",
-    date: "Sep 06, 2026",
-    amount: 1249,
+    id: "TXN-9912",
+    user: "Olivia Martin",
+    userId: "USR-1042",
+    type: "deposit",
+    amount: 2490.0,
     status: "completed",
+    date: "Sep 08, 2026 · 09:42",
+    method: "Bank transfer",
   },
   {
-    id: "#BD-2818",
-    customer: "Jackson Lee",
-    email: "jackson@example.com",
-    date: "Sep 06, 2026",
+    id: "TXN-9911",
+    user: "Jackson Lee",
+    userId: "USR-1041",
+    type: "withdrawal",
+    amount: 500.0,
+    status: "processing",
+    date: "Sep 08, 2026 · 08:17",
+    method: "Card ···· 8731",
+  },
+  {
+    id: "TXN-9910",
+    user: "Isabella Nguyen",
+    userId: "USR-1040",
+    type: "payment",
     amount: 89.99,
-    status: "processing",
-  },
-  {
-    id: "#BD-2817",
-    customer: "Isabella Nguyen",
-    email: "isabella@example.com",
-    date: "Sep 05, 2026",
-    amount: 459.5,
     status: "pending",
+    date: "Sep 07, 2026 · 21:04",
+    method: "Bonde Pay",
   },
   {
-    id: "#BD-2816",
-    customer: "William Kim",
-    email: "william@example.com",
-    date: "Sep 05, 2026",
-    amount: 32,
-    status: "refunded",
-  },
-  {
-    id: "#BD-2815",
-    customer: "Sofia Davis",
-    email: "sofia@example.com",
-    date: "Sep 04, 2026",
-    amount: 1999,
+    id: "TXN-9909",
+    user: "William Kim",
+    userId: "USR-1039",
+    type: "transfer",
+    amount: 1200.0,
     status: "completed",
+    date: "Sep 07, 2026 · 18:33",
+    method: "Wallet → Wallet",
   },
   {
-    id: "#BD-2814",
-    customer: "Ethan Brown",
-    email: "ethan@example.com",
-    date: "Sep 04, 2026",
-    amount: 79.99,
-    status: "cancelled",
+    id: "TXN-9908",
+    user: "Sofia Davis",
+    userId: "USR-1038",
+    type: "withdrawal",
+    amount: 3200.0,
+    status: "flagged",
+    date: "Sep 07, 2026 · 12:51",
+    method: "Bank transfer",
   },
   {
-    id: "#BD-2813",
-    customer: "Mia Garcia",
-    email: "mia@example.com",
-    date: "Sep 03, 2026",
-    amount: 640,
-    status: "processing",
-  },
-  {
-    id: "#BD-2812",
-    customer: "Liam Johnson",
-    email: "liam@example.com",
-    date: "Sep 03, 2026",
-    amount: 214,
+    id: "TXN-9907",
+    user: "Ethan Brown",
+    userId: "USR-1037",
+    type: "payment",
+    amount: 64.2,
     status: "completed",
+    date: "Sep 06, 2026 · 16:09",
+    method: "Card ···· 4455",
+  },
+  {
+    id: "TXN-9906",
+    user: "Mia Garcia",
+    userId: "USR-1036",
+    type: "deposit",
+    amount: 1500.0,
+    status: "completed",
+    date: "Sep 06, 2026 · 11:27",
+    method: "Bank transfer",
+  },
+  {
+    id: "TXN-9905",
+    user: "Liam Johnson",
+    userId: "USR-1035",
+    type: "deposit",
+    amount: 250.0,
+    status: "failed",
+    date: "Sep 05, 2026 · 19:55",
+    method: "Card ···· 9912",
+  },
+  {
+    id: "TXN-9904",
+    user: "Jackson Lee",
+    userId: "USR-1041",
+    type: "transfer",
+    amount: 75.5,
+    status: "completed",
+    date: "Sep 05, 2026 · 14:20",
+    method: "Wallet → Wallet",
+  },
+  {
+    id: "TXN-9903",
+    user: "Olivia Martin",
+    userId: "USR-1042",
+    type: "withdrawal",
+    amount: 800.0,
+    status: "completed",
+    date: "Sep 05, 2026 · 10:02",
+    method: "Bank transfer",
+  },
+];
+
+export type TicketPriority = "low" | "medium" | "high" | "urgent";
+export type TicketStatus = "open" | "pending" | "resolved";
+
+export type Ticket = {
+  id: string;
+  user: string;
+  userId: string;
+  subject: string;
+  priority: TicketPriority;
+  status: TicketStatus;
+  assignee: string;
+  updatedAt: string;
+  initials: string;
+};
+
+export const tickets: Ticket[] = [
+  {
+    id: "TKT-221",
+    user: "Sofia Davis",
+    userId: "USR-1038",
+    subject: "Withdrawal blocked — account under review",
+    priority: "urgent",
+    status: "open",
+    assignee: "Unassigned",
+    updatedAt: "12 min ago",
+    initials: "SD",
+  },
+  {
+    id: "TKT-220",
+    user: "Isabella Nguyen",
+    userId: "USR-1040",
+    subject: "KYC verification stuck on document upload",
+    priority: "high",
+    status: "pending",
+    assignee: "T. Reed",
+    updatedAt: "1 hour ago",
+    initials: "IN",
+  },
+  {
+    id: "TKT-219",
+    user: "Ethan Brown",
+    userId: "USR-1037",
+    subject: "Card declined twice at checkout",
+    priority: "medium",
+    status: "open",
+    assignee: "Unassigned",
+    updatedAt: "3 hours ago",
+    initials: "EB",
+  },
+  {
+    id: "TKT-218",
+    user: "Mia Garcia",
+    userId: "USR-1036",
+    subject: "How to export transaction history?",
+    priority: "low",
+    status: "resolved",
+    assignee: "A. Silva",
+    updatedAt: "Yesterday",
+    initials: "MG",
+  },
+  {
+    id: "TKT-217",
+    user: "Liam Johnson",
+    userId: "USR-1035",
+    subject: "Deposit not reflecting after 4 hours",
+    priority: "high",
+    status: "pending",
+    assignee: "T. Reed",
+    updatedAt: "Yesterday",
+    initials: "LJ",
+  },
+  {
+    id: "TKT-216",
+    user: "Jackson Lee",
+    userId: "USR-1041",
+    subject: "Change linked bank account",
+    priority: "medium",
+    status: "resolved",
+    assignee: "A. Silva",
+    updatedAt: "2 days ago",
+    initials: "JL",
+  },
+  {
+    id: "TKT-215",
+    user: "Olivia Martin",
+    userId: "USR-1042",
+    subject: "Request higher daily transfer limit",
+    priority: "low",
+    status: "open",
+    assignee: "Unassigned",
+    updatedAt: "2 days ago",
+    initials: "OM",
   },
 ];
 
@@ -110,68 +350,120 @@ export type Activity = {
   time: string;
   initials: string;
   tone?: "primary" | "success" | "warning" | "muted";
+  device?: string;
+  ip?: string;
+  status?: string;
 };
 
 export const activities: Activity[] = [
   {
     id: "1",
     actor: "Olivia Martin",
-    action: "placed a new order",
-    detail: "#BD-2819",
+    action: "logged in",
+    detail: "from a new device · Windows · Chrome",
     time: "2 minutes ago",
     initials: "OM",
     tone: "success",
+    device: "Windows · Chrome",
+    ip: "192.168.1.42",
+    status: "approved",
   },
   {
     id: "2",
     actor: "Jackson Lee",
-    action: "requested a pickup",
-    detail: "#BD-2818",
+    action: "initiated a withdrawal",
+    detail: "TXN-9911 · $500.00",
     time: "26 minutes ago",
     initials: "JL",
+    device: "iOS 18 · Bonde App",
+    ip: "10.0.0.52",
+    status: "processing",
   },
   {
     id: "3",
     actor: "Isabella Nguyen",
-    action: "updated payment method",
-    detail: "Visa •••• 4242",
+    action: "updated KYC documents",
+    detail: "Uploaded government ID",
     time: "1 hour ago",
     initials: "IN",
     tone: "warning",
+    device: "Android 14 · Bonde App",
+    ip: "172.16.4.9",
+    status: "pending",
   },
   {
     id: "4",
     actor: "Sofia Davis",
-    action: "left a 5-star review",
-    detail: "on Bonde Pro",
+    action: "triggered risk alert",
+    detail: "Large withdrawal from new device · TXN-9908",
     time: "3 hours ago",
     initials: "SD",
     tone: "primary",
+    device: "macOS · Safari",
+    ip: "203.0.113.77",
+    status: "flagged",
   },
   {
     id: "5",
     actor: "System",
     action: "completed weekly backup",
-    detail: "Deploy #4281",
+    detail: "S3 snapshot #4281",
     time: "6 hours ago",
     initials: "SY",
     tone: "muted",
+    device: "Infrastructure",
+    status: "approved",
+  },
+  {
+    id: "6",
+    actor: "William Kim",
+    action: "transferred funds",
+    detail: "TXN-9909 · $1,200.00 to Mia Garcia",
+    time: "8 hours ago",
+    initials: "WK",
+    device: "Windows · Edge",
+    ip: "192.168.1.98",
+    status: "approved",
+  },
+  {
+    id: "7",
+    actor: "Ethan Brown",
+    action: "opened a support ticket",
+    detail: "TKT-219 · Card declined twice",
+    time: "10 hours ago",
+    initials: "EB",
+    tone: "warning",
+    device: "iOS 18 · Bonde App",
+    ip: "10.0.3.17",
+    status: "open",
+  },
+  {
+    id: "8",
+    actor: "Liam Johnson",
+    action: "failed login attempt",
+    detail: "Incorrect password · 2nd attempt",
+    time: "13 hours ago",
+    initials: "LJ",
+    tone: "primary",
+    device: "Android 13 · Chrome",
+    ip: "198.51.100.34",
+    status: "denied",
   },
 ];
 
-export type WeeklyOrderPoint = {
+export type WeeklyVolumePoint = {
   day: string;
-  orders: number;
+  transactions: number;
 };
 
-export const weeklyOrders: WeeklyOrderPoint[] = [
-  { day: "Mon", orders: 132 },
-  { day: "Tue", orders: 148 },
-  { day: "Wed", orders: 121 },
-  { day: "Thu", orders: 165 },
-  { day: "Fri", orders: 178 },
-  { day: "Sat", orders: 149 },
-  { day: "Sun", orders: 102 },
+export const weeklyVolume: WeeklyVolumePoint[] = [
+  { day: "Mon", transactions: 132 },
+  { day: "Tue", transactions: 148 },
+  { day: "Wed", transactions: 121 },
+  { day: "Thu", transactions: 165 },
+  { day: "Fri", transactions: 178 },
+  { day: "Sat", transactions: 149 },
+  { day: "Sun", transactions: 102 },
 ];
 
 export type TrafficSource = {

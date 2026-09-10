@@ -29,10 +29,10 @@ import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   const [notifications, setNotifications] = useState({
-    orderUpdates: true,
-    productDigest: false,
+    transactionAlerts: true,
+    weeklyReport: false,
     securityAlerts: true,
-    marketing: false,
+    productNews: false,
   });
 
   const handleSaveProfile = (event: React.FormEvent<HTMLFormElement>) => {
@@ -69,14 +69,14 @@ export default function SettingsPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input id="name" defaultValue="Ada Lovelace" />
+                    <Input id="name" defaultValue="Bonde Admin" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
-                      defaultValue="ada@bonde.app"
+                      defaultValue="admin@bonde.app"
                     />
                   </div>
                 </div>
@@ -114,26 +114,26 @@ export default function SettingsPage() {
               {(
                 [
                   {
-                    key: "orderUpdates" as const,
-                    title: "Order updates",
+                    key: "transactionAlerts" as const,
+                    title: "Transaction alerts",
                     description:
-                      "Receive a notification when an order changes status.",
+                      "Receive a notification when a high-value or flagged transaction occurs.",
                   },
                   {
-                    key: "productDigest" as const,
-                    title: "Weekly product digest",
+                    key: "weeklyReport" as const,
+                    title: "Weekly AI report",
                     description:
-                      "A summary of top-selling products every Monday.",
+                      "A summary of AI decisions and model performance every Monday.",
                   },
                   {
                     key: "securityAlerts" as const,
                     title: "Security alerts",
                     description:
-                      "Important alerts about your account and storefront.",
+                      "Important alerts about your account and the platform.",
                   },
                   {
-                    key: "marketing" as const,
-                    title: "Product news",
+                    key: "productNews" as const,
+                    title: "Platform news",
                     description:
                       "Occasional updates about new features and tips.",
                   },

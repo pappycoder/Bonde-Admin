@@ -1,4 +1,12 @@
-import { BarChart3, LayoutDashboard, Settings, ShoppingCart } from "lucide-react";
+import {
+  ArrowLeftRight,
+  BarChart3,
+  LayoutDashboard,
+  LifeBuoy,
+  ListChecks,
+  Settings,
+  Users,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type NavItem = {
@@ -24,7 +32,14 @@ export const navGroups: NavGroup[] = [
   {
     label: "Management",
     items: [
-      { title: "Orders", href: "/orders", icon: ShoppingCart, badge: 12 },
+      { title: "Users", href: "/users", icon: Users },
+      {
+        title: "Transactions",
+        href: "/transactions",
+        icon: ArrowLeftRight,
+      },
+      { title: "Activities", href: "/activities", icon: ListChecks },
+      { title: "Support", href: "/support", icon: LifeBuoy, badge: 6 },
     ],
   },
   {

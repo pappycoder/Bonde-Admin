@@ -61,8 +61,8 @@ export function TrafficSourcesChart({ className }: { className?: string }) {
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Traffic sources</CardTitle>
-        <CardDescription>Where your visitors come from</CardDescription>
+        <CardTitle>User acquisition</CardTitle>
+        <CardDescription>How new users found Bonde</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer

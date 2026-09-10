@@ -99,9 +99,11 @@ export function Header() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              <LogOut />
-              Sign out
+            <DropdownMenuItem variant="destructive" asChild>
+              <Link href="/login">
+                <LogOut />
+                Sign out
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
