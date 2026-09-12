@@ -15,15 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
@@ -35,13 +27,6 @@ export default function SettingsPage() {
     productNews: false,
   });
 
-  const handleSaveProfile = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    toast.success("Profile saved", {
-      description: "Your account details have been updated.",
-    });
-  };
-
   const handleSaveNotifications = () => {
     toast.success("Preferences saved", {
       description: "Your notification preferences have been updated.",
@@ -52,57 +37,11 @@ export default function SettingsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Settings"
-        description="Manage your account, appearance and notifications."
+        description="Manage notifications, appearance and workspace controls."
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>
-                Update your name, email address and role.
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSaveProfile}>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" defaultValue="Bonde Admin" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      defaultValue="admin@bonde.app"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select defaultValue="admin">
-                    <SelectTrigger id="role" className="w-full sm:w-56">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="owner">Owner</SelectItem>
-                      <SelectItem value="admin">Administrator</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-              <CardFooter className="justify-end">
-                <Button type="submit" size="sm">
-                  Save changes
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>Notifications</CardTitle>

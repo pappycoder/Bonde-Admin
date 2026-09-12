@@ -1,12 +1,13 @@
 "use client";
 
 import { cn } from "cn";
-import { Search } from "lucide-react";
+import { MoreHorizontal, RotateCcw, Search, Trash2, UserX } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
-import { users, type UserStatus } from "@/lib/mock-data";
+import { users, type User, type UserStatus } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -54,10 +63,26 @@ export function UsersTable({
   description?: string;
 }) {
   const [query, setQuery] = useState("");
+  const [rows, setRows] = useState<User[]>(users);
 
-  const filtered = users.filter((user) =>
+  const filtered = rows.filter((user) =>
     `${user.name} ${user.email}`.toLowerCase().includes(query.toLowerCase()),
   );
+
+  const handleToggleStatus = (id: string, status: UserStatus) => {
+    const next: UserStatus = status === "suspended" ? "active" : "suspended";
+    setRows((prev) => prev.map((u) => (u.id === id ? { ...u, status: next } : u)));
+    toast.success(next === "suspended" ? "User suspended" : "User restored", {
+      description: `${id} is now ${next}.`,
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    setRows((prev) => prev.filter((u) => u.id !== id));
+    toast.error("User deleted", {
+      description: `${id} was removed from the platform.`,
+    });
+  };
 
   return (
     <Card>
@@ -156,9 +181,45 @@ export function UsersTable({
                   {user.lastActive}
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="sm" className="h-7 gap-1 px-2" asChild>
-                    <Link href={`/users/${user.id.toLowerCase()}`}>View</Link>
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7"
+                        aria-label="User actions"
+                      >
+                        <MoreHorizontal className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href={`/users/${user.id.toLowerCase()}`}>
+                          View details
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleStatus(user.id, user.status)}>
+                        {user.status === "suspended" ? (
+                          <>
+                            <RotateCcw className="size-4" />
+                            Restore user
+                          </>
+                        ) : (
+                          <>
+                            <UserX className="size-4" />
+                            Suspend user
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant="destructive" onClick={() => handleDelete(user.id)}>
+                        <Trash2 className="size-4" />
+                        Delete user
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </motion.tr>
             ))}

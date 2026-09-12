@@ -40,30 +40,21 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard" className="items-center gap-2">
+              <Link href="/dashboard">
                 <Image
                   src={siteConfig.icon}
                   alt={siteConfig.name}
                   width={512}
                   height={512}
-                  className="hidden size-8 shrink-0 rounded-lg group-data-[collapsible=icon]:block"
+                  className="hidden size-8 shrink-0 group-data-[collapsible=icon]:block"
                 />
                 <Image
                   src={siteConfig.logo}
                   alt={siteConfig.name}
-                  width={318}
+                  width={292}
                   height={113}
-                  priority
                   className="h-7 w-auto group-data-[collapsible=icon]:hidden"
                 />
-                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate font-semibold">
-                    {siteConfig.name}
-                  </span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {siteConfig.tagline}
-                  </span>
-                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -159,7 +150,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/settings">
+                  <Link href="/profile">
                     <UserRound />
                     Profile
                   </Link>

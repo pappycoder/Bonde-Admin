@@ -19,19 +19,16 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="relative w-full max-w-md space-y-6">
         <Link
           href="/login"
-          className="mx-auto flex w-fit flex-col items-center gap-3"
+          className="mx-auto flex w-fit flex-col items-center gap-4"
         >
           <Image
             src={siteConfig.logo}
             alt={siteConfig.name}
-            width={318}
+            width={292}
             height={113}
             priority
-            className="h-10 w-auto"
+            className="h-12 w-auto"
           />
-          <span className="text-xs text-muted-foreground">
-            {siteConfig.tagline}
-          </span>
         </Link>
 
         <Card className="w-full p-6">{children}</Card>

@@ -87,7 +87,7 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/settings">
+              <Link href="/profile">
                 <UserRound />
                 Profile
               </Link>

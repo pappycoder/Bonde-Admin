@@ -250,6 +250,12 @@ export const transactions: Transaction[] = [
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
 export type TicketStatus = "open" | "pending" | "resolved";
 
+export type TicketMessage = {
+  from: "user" | "support";
+  text: string;
+  time: string;
+};
+
 export type Ticket = {
   id: string;
   user: string;
@@ -260,6 +266,7 @@ export type Ticket = {
   assignee: string;
   updatedAt: string;
   initials: string;
+  messages: TicketMessage[];
 };
 
 export const tickets: Ticket[] = [
@@ -273,6 +280,23 @@ export const tickets: Ticket[] = [
     assignee: "Unassigned",
     updatedAt: "12 min ago",
     initials: "SD",
+    messages: [
+      {
+        from: "user",
+        text: "Hi, I've been trying to withdraw $250 but the action is blocked and it says my account is under review. Can you help?",
+        time: "2 hours ago",
+      },
+      {
+        from: "support",
+        text: "Hi Sofia, thanks for reaching out. I'm checking what triggered the review on your account.",
+        time: "1 hour ago",
+      },
+      {
+        from: "user",
+        text: "Thanks. I've never had an issue with withdrawals before.",
+        time: "25 min ago",
+      },
+    ],
   },
   {
     id: "TKT-220",
@@ -284,6 +308,23 @@ export const tickets: Ticket[] = [
     assignee: "T. Reed",
     updatedAt: "1 hour ago",
     initials: "IN",
+    messages: [
+      {
+        from: "user",
+        text: "My KYC verification is stuck on the document upload step for over a week now.",
+        time: "4 hours ago",
+      },
+      {
+        from: "support",
+        text: "Thanks Isabella. I can see the upload on our side — checking with the verification team.",
+        time: "2 hours ago",
+      },
+      {
+        from: "user",
+        text: "I re-uploaded my passport just now in case the first one was rejected.",
+        time: "1 hour ago",
+      },
+    ],
   },
   {
     id: "TKT-219",
@@ -295,6 +336,18 @@ export const tickets: Ticket[] = [
     assignee: "Unassigned",
     updatedAt: "3 hours ago",
     initials: "EB",
+    messages: [
+      {
+        from: "user",
+        text: "My card was declined twice while trying to pay for an order today.",
+        time: "5 hours ago",
+      },
+      {
+        from: "support",
+        text: "Sorry about that. Can you confirm the last four digits of the card and the merchant?",
+        time: "3 hours ago",
+      },
+    ],
   },
   {
     id: "TKT-218",
@@ -306,6 +359,18 @@ export const tickets: Ticket[] = [
     assignee: "A. Silva",
     updatedAt: "Yesterday",
     initials: "MG",
+    messages: [
+      {
+        from: "user",
+        text: "How do I export my transaction history as a CSV file?",
+        time: "2 days ago",
+      },
+      {
+        from: "support",
+        text: "Hi Mia, go to Transactions → Export and choose CSV or PDF. Let me know if it's missing!",
+        time: "Yesterday",
+      },
+    ],
   },
   {
     id: "TKT-217",
@@ -317,6 +382,18 @@ export const tickets: Ticket[] = [
     assignee: "T. Reed",
     updatedAt: "Yesterday",
     initials: "LJ",
+    messages: [
+      {
+        from: "user",
+        text: "I made a deposit 4 hours ago and it still hasn't reflected in my balance.",
+        time: "4 hours ago",
+      },
+      {
+        from: "support",
+        text: "Thanks Liam, I can see the deposit is queued — the provider is slow today. We'll update you.",
+        time: "2 hours ago",
+      },
+    ],
   },
   {
     id: "TKT-216",
@@ -328,6 +405,18 @@ export const tickets: Ticket[] = [
     assignee: "A. Silva",
     updatedAt: "2 days ago",
     initials: "JL",
+    messages: [
+      {
+        from: "user",
+        text: "Please help me change the bank account linked to my Bonde wallet.",
+        time: "3 days ago",
+      },
+      {
+        from: "support",
+        text: "Sure Jackson — verified your new account and unlinked the old one. Done!",
+        time: "2 days ago",
+      },
+    ],
   },
   {
     id: "TKT-215",
@@ -339,6 +428,13 @@ export const tickets: Ticket[] = [
     assignee: "Unassigned",
     updatedAt: "2 days ago",
     initials: "OM",
+    messages: [
+      {
+        from: "user",
+        text: "I'd like to request a higher daily transfer limit than the current one.",
+        time: "2 days ago",
+      },
+    ],
   },
 ];
 

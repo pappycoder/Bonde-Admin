@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { transactions, users, tickets } from "@/lib/mock-data";
+import { UserDetailActions } from "@/components/dashboard/user-detail-actions";
 import { UserScreenView } from "@/components/dashboard/user-screen-view";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -87,9 +88,7 @@ export default async function UserDetailPage({ params }: PageProps) {
                 </CardDescription>
               </div>
             </div>
-            <Button size="sm" variant="outline">
-              Suspend user
-            </Button>
+            <UserDetailActions userId={user.id} initialStatus={user.status} />
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-3">

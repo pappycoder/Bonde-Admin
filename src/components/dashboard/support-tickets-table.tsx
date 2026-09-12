@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 import { motion } from "motion/react";
+import Link from "next/link";
 
 import { tickets, type TicketPriority, type TicketStatus } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -79,7 +80,12 @@ export function SupportTicketsTable({
                 }}
               >
                 <TableCell className="font-medium tabular-nums">
-                  {ticket.id}
+                  <Link
+                    href={`/support/${ticket.id.toLowerCase()}`}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {ticket.id}
+                  </Link>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2.5">
@@ -93,9 +99,12 @@ export function SupportTicketsTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="max-w-64 truncate font-medium">
+                    <Link
+                      href={`/support/${ticket.id.toLowerCase()}`}
+                      className="max-w-64 truncate font-medium underline-offset-4 hover:underline"
+                    >
                       {ticket.subject}
-                    </span>
+                    </Link>
                     <span className="text-xs text-muted-foreground">
                       Updated {ticket.updatedAt}
                     </span>
