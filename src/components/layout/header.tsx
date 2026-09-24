@@ -2,8 +2,10 @@
 
 import { Bell, Search, UserRound, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { LogoutDialog } from "@/components/auth/logout-dialog";
 import { siteConfig } from "@/config/site";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -19,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/auth/auth-provider";
 
 function handleNotificationClick() {
   toast("You are all caught up", {
@@ -27,6 +30,13 @@ function handleNotificationClick() {
 }
 
 export function Header() {
+  const { user } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const name = user?.name ?? siteConfig.user.name;
+  const email = user?.email ?? siteConfig.user.email;
+  const initials = user?.initials ?? siteConfig.user.initials;
+
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
       <SidebarTrigger />
@@ -70,7 +80,7 @@ export function Header() {
               aria-label="Account"
             >
               <Avatar className="size-7">
-                <AvatarFallback>{siteConfig.user.initials}</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -78,10 +88,10 @@ export function Header() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">
-                  {siteConfig.user.name}
+                  {name}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {siteConfig.user.email}
+                  {email}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -99,15 +109,14 @@ export function Header() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" asChild>
-              <Link href="/login">
-                <LogOut />
-                Sign out
-              </Link>
+            <DropdownMenuItem variant="destructive" onClick={() => setLogoutOpen(true)}>
+              <LogOut />
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <LogoutDialog open={logoutOpen} onOpenChange={setLogoutOpen} />
     </header>
   );
 }

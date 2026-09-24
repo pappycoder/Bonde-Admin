@@ -6,25 +6,38 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ApiError } from "@/lib/api-client";
+import { forgotPassword } from "@/lib/auth/auth-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
-      toast.success("Reset link sent", {
-        description:
-          "If an account exists for that email, a password reset link is on its way.",
+    try {
+      await forgotPassword(email);
+      toast.success("Reset code sent", {
+        description: `Check ${email} for a 4-digit reset code.`,
       });
-      router.push("/login");
-    }, 600);
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof ApiError && err.status === 429) {
+        setError("Too many attempts. Try again in a moment.");
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    }
   }
 
   return (
@@ -37,7 +50,7 @@ export default function ForgotPasswordPage() {
           Forgot password
         </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a link to reset your
+          Enter your email and we&apos;ll send you a code to reset your
           password.
         </p>
       </div>
@@ -52,11 +65,15 @@ export default function ForgotPasswordPage() {
             required
             autoComplete="email"
             autoFocus
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </div>
 
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Sending…" : "Send reset link"}
+          {loading ? "Sending…" : "Send reset code"}
         </Button>
       </form>
 

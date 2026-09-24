@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/lib/auth/auth-provider";
 
 const sessions = [
   {
@@ -40,8 +41,14 @@ const sessions = [
 ];
 
 export default function ProfilePage() {
+  const { user } = useAuth();
   const [twoFactor, setTwoFactor] = useState(true);
   const [sessionsList, setSessionsList] = useState(sessions);
+
+  const name = user?.name ?? siteConfig.user.name;
+  const email = user?.email ?? siteConfig.user.email;
+  const initials = user?.initials ?? siteConfig.user.initials;
+  const role = user?.role ?? "ADMIN";
 
   const handleProfile = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -83,7 +90,7 @@ export default function ProfilePage() {
                 <div className="flex items-start gap-4">
                   <div className="relative">
                     <Avatar className="size-14">
-                      <AvatarFallback>{siteConfig.user.initials}</AvatarFallback>
+                      <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <Button
                       type="button"
@@ -105,10 +112,10 @@ export default function ProfilePage() {
                       variant="outline"
                       className="border-transparent bg-primary/10 text-primary"
                     >
-                      Administrator
+                      {role}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      {siteConfig.user.email}
+                      {email}
                     </span>
                   </div>
                 </div>
@@ -116,14 +123,14 @@ export default function ProfilePage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="p-name">Full name</Label>
-                    <Input id="p-name" defaultValue={siteConfig.user.name} />
+                    <Input id="p-name" defaultValue={name} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="p-email">Email</Label>
                     <Input
                       id="p-email"
                       type="email"
-                      defaultValue={siteConfig.user.email}
+                      defaultValue={email}
                     />
                   </div>
                 </div>

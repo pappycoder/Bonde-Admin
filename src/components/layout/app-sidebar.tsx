@@ -3,12 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { ChevronUp, CreditCard, LogOut, UserRound } from "lucide-react";
 
+import { LogoutDialog } from "@/components/auth/logout-dialog";
 import { navGroups } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/lib/auth/auth-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +36,12 @@ import {
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const name = user?.name ?? siteConfig.user.name;
+  const email = user?.email ?? siteConfig.user.email;
+  const initials = user?.initials ?? siteConfig.user.initials;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -112,15 +121,15 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 >
                   <Avatar className="size-8 rounded-lg">
                     <AvatarFallback className="rounded-lg">
-                      {siteConfig.user.initials}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">
-                      {siteConfig.user.name}
+                      {name}
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {siteConfig.user.email}
+                      {email}
                     </span>
                   </div>
                   <ChevronUp className="ml-auto size-4" />
@@ -135,15 +144,15 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="size-8 rounded-lg">
                       <AvatarFallback className="rounded-lg">
-                        {siteConfig.user.initials}
+                        {initials}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {siteConfig.user.name}
+                        {name}
                       </span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {siteConfig.user.email}
+                        {email}
                       </span>
                     </div>
                   </div>
@@ -160,11 +169,9 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   Billing
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" asChild>
-                  <Link href="/login">
-                    <LogOut />
-                    Sign out
-                  </Link>
+                <DropdownMenuItem variant="destructive" onClick={() => setLogoutOpen(true)}>
+                  <LogOut />
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -172,6 +179,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarFooter>
 
+      <LogoutDialog open={logoutOpen} onOpenChange={setLogoutOpen} />
       <SidebarRail />
     </Sidebar>
   );

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ApiError } from "@/lib/api-client";
+import { useAuth } from "@/lib/auth/auth-provider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,18 +15,37 @@ import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function loginErrorOf(err: unknown): string {
+    if (err instanceof ApiError) {
+      if (err.status === 401) return "Invalid email or password.";
+      if (err.status === 403) return "Your email has not been verified yet.";
+      if (err.status === 429) return "Too many attempts. Try again in a moment.";
+      return err.message;
+    }
+    return "Something went wrong. Please try again.";
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
+    try {
+      await login(email, password, remember);
       toast.success("Signed in", {
         description: "Welcome back to the Bonde admin console.",
       });
       router.push("/dashboard");
-    }, 600);
+    } catch (err) {
+      setLoading(false);
+      setError(loginErrorOf(err));
+    }
   }
 
   return (
@@ -46,6 +67,8 @@ export default function LoginPage() {
             required
             autoComplete="email"
             autoFocus
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </div>
 
@@ -65,15 +88,23 @@ export default function LoginPage() {
             placeholder="••••••••"
             required
             autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Checkbox id="remember" />
+          <Checkbox
+            id="remember"
+            checked={remember}
+            onCheckedChange={(checked) => setRemember(Boolean(checked))}
+          />
           <Label htmlFor="remember" className="text-sm font-normal">
             Remember me
           </Label>
         </div>
+
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}

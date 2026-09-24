@@ -6,20 +6,38 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ApiError } from "@/lib/api-client";
+import { resetPassword } from "@/lib/auth/auth-api";
+import {
+  clearResetEmail,
+  clearResetToken,
+  loadResetEmail,
+  loadResetToken,
+} from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [token] = useState(() => loadResetToken());
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function backToVerifyHref(): string {
+    const email = loadResetEmail();
+    return email ? `/verify-otp?email=${encodeURIComponent(email)}` : "/forgot-password";
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!token) {
+      setError("This reset link is missing its verification code.");
+      return;
+    }
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
@@ -31,13 +49,28 @@ export default function ResetPasswordPage() {
 
     setError(null);
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
+    try {
+      await resetPassword(token, password);
+      clearResetToken();
+      clearResetEmail();
       toast.success("Password updated", {
         description: "You can now sign in with your new password.",
       });
       router.push("/login");
-    }, 600);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setError("This reset link has expired. Please start over.");
+        } else if (err.status === 429) {
+          setError("Too many attempts. Try again in a moment.");
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    }
   }
 
   return (
@@ -84,22 +117,22 @@ export default function ResetPasswordPage() {
           />
         </div>
 
-        {error ? (
-          <p className="text-sm text-destructive">{error}</p>
-        ) : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Updating…" : "Update password"}
         </Button>
       </form>
 
-      <Link
-        href="/login"
-        className="mx-auto flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to login
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          href={backToVerifyHref()}
+          className="mx-auto flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back to verification code
+        </Link>
+      </div>
     </div>
   );
 }
