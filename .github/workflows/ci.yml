@@ -1,0 +1,61 @@
+# =============================================================================
+# Bonde Admin - CI
+# -----------------------------------------------------------------------------
+# Quality gate: lint + build for the Next.js dashboard. Every job is required;
+# the `check` gate summarises them so branch protection can require a single
+# status. Deployments happen through Vercel's GitHub integration (same as the
+# backend), so this pipeline is CI-only.
+#
+# The project uses npm (package-lock.json), Node 22 (matches Bonde-Backend), and
+# `next build` performs the TypeScript type-check + production prerender. The
+# build needs no secrets: next.config.ts's /api rewrite falls back to the
+# default API_URL when unset.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  check:
+    name: All checks passed
+    runs-on: ubuntu-latest
+    needs: [lint, build]
+    steps:
+      - run: echo "All CI jobs passed."
