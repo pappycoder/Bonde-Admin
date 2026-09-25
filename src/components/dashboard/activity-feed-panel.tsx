@@ -4,6 +4,7 @@ import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { ErrorState, LoadingState } from "@/components/data/state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApi } from "@/hooks/use-api";
+import { useAdminUserNames } from "@/lib/api/admin";
 import { listAdminAuditLogs, toActivityItems } from "@/lib/api/audit-logs";
 
 function FeedShell({
@@ -28,6 +29,11 @@ export function ActivityFeedPanel({ className }: { className?: string }) {
     () => listAdminAuditLogs({ pageSize: 8 }),
     [],
   );
+  const names = useAdminUserNames(
+    (data?.items ?? [])
+      .map((log) => log.userId)
+      .filter((id): id is string => Boolean(id)),
+  );
 
   if (loading && !data) {
     return (
@@ -45,7 +51,7 @@ export function ActivityFeedPanel({ className }: { className?: string }) {
     );
   }
 
-  const items = toActivityItems(data?.items ?? []);
+  const items = toActivityItems(data?.items ?? [], names);
   if (items.length === 0) {
     return (
       <FeedShell className={className}>

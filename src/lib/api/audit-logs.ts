@@ -1,5 +1,6 @@
 import { api, type ApiList, type ListQuery } from "@/lib/api-client";
-import { timeAgo } from "@/lib/format";
+import { initialsOf, timeAgo } from "@/lib/format";
+import type { AdminUserNames } from "@/lib/api/admin";
 
 export interface AdminAuditLog {
   id: string;
@@ -56,8 +57,10 @@ function humanizeAction(action: string): string {
   return parts.join(" · ");
 }
 
-function actorOf(log: AdminAuditLog): { actor: string; initials: string } {
+function actorOf(log: AdminAuditLog, names?: AdminUserNames): { actor: string; initials: string } {
   if (!log.userId) return { actor: "System", initials: "SY" };
+  const fullName = names?.[log.userId];
+  if (fullName) return { actor: fullName, initials: initialsOf(fullName) };
   const short = log.userId.slice(0, 8);
   return { actor: `User ${short}`, initials: short.slice(0, 2).toUpperCase() };
 }
@@ -88,12 +91,15 @@ function detailOf(log: AdminAuditLog): string {
 
 /**
  * Adapter from the read-only admin audit surface (`/api/admin/audit-logs`) to
- * the prop-driven dashboard components. Actor identity is a short user ID —
- * full names arrive in Phase 2 when the admin users endpoint exists.
+ * the prop-driven dashboard components. When `names` (from the admin users
+ * names endpoint) is provided, actor short-ids are replaced with full names.
  */
-export function toActivityItems(logs: AdminAuditLog[]): ActivityItem[] {
+export function toActivityItems(
+  logs: AdminAuditLog[],
+  names?: AdminUserNames,
+): ActivityItem[] {
   return logs.map((log) => {
-    const actor = actorOf(log);
+    const actor = actorOf(log, names);
     return {
       id: log.id,
       actor: actor.actor,

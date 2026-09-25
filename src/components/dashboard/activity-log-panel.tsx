@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useList } from "@/hooks/use-list";
+import { useAdminUserNames } from "@/lib/api/admin";
 import { toActivityItems, type AdminAuditLog } from "@/lib/api/audit-logs";
 
 export function ActivityLogPanel() {
@@ -17,13 +18,18 @@ export function ActivityLogPanel() {
     "/admin/audit-logs",
     { pageSize: 20 },
   );
+  const names = useAdminUserNames(
+    (data?.items ?? [])
+      .map((log) => log.userId)
+      .filter((id): id is string => Boolean(id)),
+  );
 
   const applySearch = (value: string) => {
     setSearch(value);
     setQuery((prev) => ({ ...prev, q: value.trim() || undefined, page: 1 }));
   };
 
-  const items = toActivityItems(data?.items ?? []);
+  const items = toActivityItems(data?.items ?? [], names);
   const page = data?.page ?? 0;
   const totalPages = data?.totalPages ?? 0;
 

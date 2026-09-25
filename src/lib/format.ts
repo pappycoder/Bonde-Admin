@@ -17,3 +17,43 @@ export function timeAgo(iso: string | Date): string {
   }
   return "just now";
 }
+
+const formatterCache = new Map<string, Intl.NumberFormat>();
+
+function currencyFormatter(currency: string): Intl.NumberFormat {
+  let formatter = formatterCache.get(currency);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat("en-NG", { style: "currency", currency });
+    formatterCache.set(currency, formatter);
+  }
+  return formatter;
+}
+
+/** Format a money string/number from the API into a currency string. */
+export function formatMoney(value: number | string, currency = "NGN"): string {
+  const amount = typeof value === "string" ? Number(value) : value;
+  if (Number.isNaN(amount)) return currencyFormatter(currency).format(0);
+  return currencyFormatter(currency).format(amount);
+}
+
+/** Up to two initials from a full name, e.g. "Olivia Martin" → "OM". */
+export function initialsOf(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0].toUpperCase())
+      .join("") || "??"
+  );
+}
+
+/** Short readable id fragment for tables, e.g. first 8 chars of a UUID. */
+export function shortId(id: string): string {
+  return id.length > 8 ? id.slice(0, 8) : id;
+}
+
+/** e.g. "Aug 2026" — used for the joined-on date. */
+export function formatMonthYear(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}

@@ -8,11 +8,11 @@ import {
 import { ActivityFeedPanel } from "@/components/dashboard/activity-feed-panel";
 import { OverviewChart } from "@/components/dashboard/overview-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { TransactionsTable } from "@/components/dashboard/transactions-table";
+import { TransactionsTablePanel } from "@/components/dashboard/transactions-table-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Stagger } from "@/components/motion/stagger";
-import { revenueData, transactions } from "@/lib/mock-data";
+import { revenueData } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
@@ -67,7 +67,7 @@ export default function DashboardPage() {
         <ActivityFeedPanel />
       </div>
 
-      <TransactionsTable transactions={transactions} />
+      <TransactionsTablePanel pageSize={8} showViewAll />
     </div>
   );
 }

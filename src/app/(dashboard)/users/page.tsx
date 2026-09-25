@@ -1,11 +1,9 @@
-import { UsersTable } from "@/components/dashboard/users-table";
+import { UsersTablePanel } from "@/components/dashboard/users-table-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Stagger } from "@/components/motion/stagger";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Activity, ShieldCheck, UserCheck, UserX } from "lucide-react";
-
-import { users } from "@/lib/mock-data";
 
 export default function UsersPage() {
   return (
@@ -52,7 +50,7 @@ export default function UsersPage() {
         />
       </Stagger>
 
-      <UsersTable users={users} />
+      <UsersTablePanel />
     </div>
   );
 }
