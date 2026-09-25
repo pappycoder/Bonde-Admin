@@ -3,7 +3,7 @@
 import { cn } from "cn";
 import { motion } from "motion/react";
 
-import { activities } from "@/lib/mock-data";
+import type { Activity } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -37,9 +37,11 @@ const STATUS_CLASSES: Record<string, string> = {
 };
 
 export function ActivityLog({
+  activities,
   title = "Activity log",
   description = "Every action taken across the platform.",
 }: {
+  activities: Activity[];
   title?: string;
   description?: string;
 }) {

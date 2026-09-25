@@ -1,6 +1,7 @@
 import { SupportTicketsTable } from "@/components/dashboard/support-tickets-table";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
+import { tickets } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 
 export default function SupportPage() {
@@ -15,7 +16,7 @@ export default function SupportPage() {
         </PageHeader>
       </FadeIn>
 
-      <SupportTicketsTable />
+      <SupportTicketsTable tickets={tickets} />
     </div>
   );
 }

@@ -4,7 +4,11 @@ import { cn } from "cn";
 import { motion } from "motion/react";
 import Link from "next/link";
 
-import { tickets, type TicketPriority, type TicketStatus } from "@/lib/mock-data";
+import type {
+  Ticket,
+  TicketPriority,
+  TicketStatus,
+} from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,9 +45,11 @@ const STATUS_CLASSES: Record<TicketStatus, string> = {
 };
 
 export function SupportTicketsTable({
+  tickets,
   title = "Support tickets",
   description = "Complaints, requests and help conversations.",
 }: {
+  tickets: Ticket[];
   title?: string;
   description?: string;
 }) {

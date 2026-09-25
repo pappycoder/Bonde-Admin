@@ -2,6 +2,8 @@ import { ActivityLog } from "@/components/dashboard/activity-log";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 
+import { activities } from "@/lib/mock-data";
+
 export default function ActivitiesPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -12,7 +14,7 @@ export default function ActivitiesPage() {
         />
       </FadeIn>
 
-      <ActivityLog />
+      <ActivityLog activities={activities} />
     </div>
   );
 }

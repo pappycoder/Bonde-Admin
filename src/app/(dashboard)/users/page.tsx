@@ -5,6 +5,8 @@ import { Stagger } from "@/components/motion/stagger";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Activity, ShieldCheck, UserCheck, UserX } from "lucide-react";
 
+import { users } from "@/lib/mock-data";
+
 export default function UsersPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -50,7 +52,7 @@ export default function UsersPage() {
         />
       </Stagger>
 
-      <UsersTable />
+      <UsersTable users={users} />
     </div>
   );
 }

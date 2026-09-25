@@ -2,7 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import { weeklyVolume } from "@/lib/mock-data";
+import type { WeeklyVolumePoint } from "@/lib/mock-data";
 import {
   Card,
   CardContent,
@@ -21,7 +21,13 @@ const chartConfig = {
   transactions: { label: "Transactions", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
-export function WeeklyTransactionsChart({ className }: { className?: string }) {
+export function WeeklyTransactionsChart({
+  data,
+  className,
+}: {
+  data: WeeklyVolumePoint[];
+  className?: string;
+}) {
   return (
     <Card className={className}>
       <CardHeader>
@@ -33,7 +39,7 @@ export function WeeklyTransactionsChart({ className }: { className?: string }) {
           config={chartConfig}
           className="aspect-auto h-[280px] w-full"
         >
-          <BarChart data={weeklyVolume} margin={{ left: 12, right: 12 }}>
+          <BarChart data={data} margin={{ left: 12, right: 12 }}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="day"

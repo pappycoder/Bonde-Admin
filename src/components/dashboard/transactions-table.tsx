@@ -5,10 +5,10 @@ import { ArrowUpRight, MoreHorizontal } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 
-import {
-  transactions,
-  type TransactionStatus,
-  type TransactionType,
+import type {
+  Transaction,
+  TransactionStatus,
+  TransactionType,
 } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,12 +62,14 @@ const currency = new Intl.NumberFormat("en-US", {
 });
 
 type TransactionsTableProps = {
+  transactions: Transaction[];
   title?: string;
   description?: string;
   showViewAll?: boolean;
 };
 
 export function TransactionsTable({
+  transactions,
   title = "Recent transactions",
   description = "Latest movement across the platform.",
   showViewAll = true,

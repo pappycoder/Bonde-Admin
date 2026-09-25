@@ -1,6 +1,7 @@
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
+import { transactions } from "@/lib/mock-data";
 
 export default function TransactionsPage() {
   return (
@@ -13,6 +14,7 @@ export default function TransactionsPage() {
       </FadeIn>
 
       <TransactionsTable
+        transactions={transactions}
         title="All transactions"
         description="Latest movement across the platform."
         showViewAll={false}

@@ -2,7 +2,7 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import { revenueData } from "@/lib/mock-data";
+import type { RevenuePoint } from "@/lib/mock-data";
 import {
   Card,
   CardContent,
@@ -22,7 +22,13 @@ const chartConfig = {
   expenses: { label: "Payouts", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
-export function OverviewChart({ className }: { className?: string }) {
+export function OverviewChart({
+  data,
+  className,
+}: {
+  data: RevenuePoint[];
+  className?: string;
+}) {
   return (
     <Card className={className}>
       <CardHeader>
@@ -36,7 +42,7 @@ export function OverviewChart({ className }: { className?: string }) {
           config={chartConfig}
           className="aspect-auto h-[280px] w-full"
         >
-          <AreaChart data={revenueData} margin={{ left: 12, right: 12 }}>
+          <AreaChart data={data} margin={{ left: 12, right: 12 }}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"

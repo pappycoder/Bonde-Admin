@@ -4,7 +4,7 @@ import { cn } from "cn";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
-import { activities } from "@/lib/mock-data";
+import type { Activity } from "@/lib/mock-data";
 import { Stagger } from "@/components/motion/stagger";
 import { StaggerItem } from "@/components/motion/stagger-item";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,7 +23,13 @@ const TONE_DOT_CLASSES = {
   muted: "bg-muted-foreground",
 } as const;
 
-export function ActivityFeed({ className }: { className?: string }) {
+export function ActivityFeed({
+  activities,
+  className,
+}: {
+  activities: Activity[];
+  className?: string;
+}) {
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">

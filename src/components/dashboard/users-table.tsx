@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { users, type User, type UserStatus } from "@/lib/mock-data";
+import type { User, UserStatus } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,14 +56,22 @@ function riskTone(score: number) {
 }
 
 export function UsersTable({
+  users,
   title = "All users",
   description = "Monitor who is active across the platform.",
 }: {
+  users: User[];
   title?: string;
   description?: string;
 }) {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<User[]>(users);
+  const [prevUsers, setPrevUsers] = useState<User[]>(users);
+
+  if (prevUsers !== users) {
+    setPrevUsers(users);
+    setRows(users);
+  }
 
   const filtered = rows.filter((user) =>
     `${user.name} ${user.email}`.toLowerCase().includes(query.toLowerCase()),

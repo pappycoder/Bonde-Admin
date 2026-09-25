@@ -2,6 +2,7 @@ import { TrafficSourcesChart } from "@/components/dashboard/traffic-sources-char
 import { WeeklyTransactionsChart } from "@/components/dashboard/weekly-transactions-chart";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
+import { trafficSources, weeklyVolume } from "@/lib/mock-data";
 
 export default function AnalyticsPage() {
   return (
@@ -14,8 +15,8 @@ export default function AnalyticsPage() {
       </FadeIn>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <WeeklyTransactionsChart />
-        <TrafficSourcesChart />
+        <WeeklyTransactionsChart data={weeklyVolume} />
+        <TrafficSourcesChart data={trafficSources} />
       </div>
     </div>
   );

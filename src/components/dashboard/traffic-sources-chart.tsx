@@ -2,7 +2,7 @@
 
 import { Cell, Label, Pie, PieChart } from "recharts";
 
-import { trafficSources } from "@/lib/mock-data";
+import type { TrafficSource } from "@/lib/mock-data";
 import {
   Card,
   CardContent,
@@ -26,9 +26,13 @@ const chartConfig = {
   social: { label: "Social", color: "var(--chart-4)" },
 } satisfies ChartConfig;
 
-const total = trafficSources.reduce((sum, source) => sum + source.value, 0);
-
-function CenterLabel({ viewBox }: { viewBox?: { cx?: number; cy?: number } }) {
+function CenterLabel({
+  total,
+  viewBox,
+}: {
+  total: number;
+  viewBox?: { cx?: number; cy?: number };
+}) {
   const { cx, cy } = viewBox ?? {};
 
   return (
@@ -57,7 +61,15 @@ function CenterLabel({ viewBox }: { viewBox?: { cx?: number; cy?: number } }) {
   );
 }
 
-export function TrafficSourcesChart({ className }: { className?: string }) {
+export function TrafficSourcesChart({
+  data,
+  className,
+}: {
+  data: TrafficSource[];
+  className?: string;
+}) {
+  const total = data.reduce((sum, source) => sum + source.value, 0);
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -75,16 +87,19 @@ export function TrafficSourcesChart({ className }: { className?: string }) {
               content={<ChartTooltipContent nameKey="name" hideLabel />}
             />
             <Pie
-              data={trafficSources}
+              data={data}
               dataKey="value"
               nameKey="name"
               innerRadius={60}
               strokeWidth={4}
             >
-              {trafficSources.map((source) => (
+              {data.map((source) => (
                 <Cell key={source.name} fill={source.fill} />
               ))}
-              <Label content={<CenterLabel />} position="center" />
+              <Label
+                content={<CenterLabel total={total} />}
+                position="center"
+              />
             </Pie>
             <ChartLegend content={<ChartLegendContent nameKey="name" />} />
           </PieChart>
