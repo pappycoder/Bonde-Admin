@@ -5,14 +5,14 @@ import {
   Users,
 } from "lucide-react";
 
-import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { ActivityFeedPanel } from "@/components/dashboard/activity-feed-panel";
 import { OverviewChart } from "@/components/dashboard/overview-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Stagger } from "@/components/motion/stagger";
-import { activities, revenueData, transactions } from "@/lib/mock-data";
+import { revenueData, transactions } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
@@ -64,7 +64,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <OverviewChart data={revenueData} className="lg:col-span-2" />
-        <ActivityFeed activities={activities} />
+        <ActivityFeedPanel />
       </div>
 
       <TransactionsTable transactions={transactions} />

@@ -22,6 +22,7 @@ export interface AuthUser {
   name: string;
   initials: string;
   role: BondeRole;
+  avatarUrl: string | null;
 }
 
 export async function login(email: string, password: string): Promise<Session> {
@@ -65,6 +66,10 @@ export function toAuthUser(principal: Principal): AuthUser {
     parts.length >= 2
       ? (parts[0][0] ?? "") + (parts[parts.length - 1][0] ?? "")
       : name.slice(0, 2);
+  const avatar =
+    typeof principal.userMetadata?.avatar_url === "string"
+      ? (principal.userMetadata.avatar_url as string)
+      : null;
   return {
     id: principal.userId,
     email,
@@ -72,5 +77,6 @@ export function toAuthUser(principal: Principal): AuthUser {
     name,
     initials: initials.toUpperCase(),
     role: principal.role,
+    avatarUrl: avatar,
   };
 }

@@ -21,6 +21,7 @@ interface AuthContextValue {
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateProfileDisplay: (input: { name?: string; avatarUrl?: string | null }) => void;
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -72,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: session.user.email.split("@")[0] || "Bonde Admin",
         initials: session.user.email.slice(0, 2).toUpperCase(),
         role: "USER",
+        avatarUrl: null,
       });
     }
   }
@@ -86,6 +88,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(toAuthUser(principal));
   }
 
+  function updateProfileDisplay(input: {
+    name?: string;
+    avatarUrl?: string | null;
+  }): void {
+    setUser((current) => {
+      if (!current) return current;
+      const name = (input.name ?? current.name).trim() || current.name;
+      const parts = name.split(" ").filter(Boolean);
+      const initials =
+        parts.length >= 2
+          ? (parts[0][0] ?? "") + (parts[parts.length - 1][0] ?? "")
+          : name.slice(0, 2);
+      return {
+        ...current,
+        name,
+        initials: initials.toUpperCase(),
+        avatarUrl: input.avatarUrl !== undefined ? input.avatarUrl : current.avatarUrl,
+      };
+    });
+  }
+
   const value = React.useMemo<AuthContextValue>(
     () => ({
       user,
@@ -94,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       logout,
       refreshUser,
+      updateProfileDisplay,
     }),
     [user, loading],
   );

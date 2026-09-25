@@ -1,14 +1,14 @@
 "use client";
 
-import { Bell, Search, UserRound, LogOut, Settings } from "lucide-react";
+import { Search, UserRound, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { LogoutDialog } from "@/components/auth/logout-dialog";
 import { siteConfig } from "@/config/site";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NotificationsMenu } from "@/components/layout/notifications-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,12 +23,6 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth/auth-provider";
 
-function handleNotificationClick() {
-  toast("You are all caught up", {
-    description: "No pending notifications right now.",
-  });
-}
-
 export function Header() {
   const { user } = useAuth();
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -36,6 +30,7 @@ export function Header() {
   const name = user?.name ?? siteConfig.user.name;
   const email = user?.email ?? siteConfig.user.email;
   const initials = user?.initials ?? siteConfig.user.initials;
+  const avatarUrl = user?.avatarUrl ?? null;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
@@ -56,16 +51,7 @@ export function Header() {
       </div>
 
       <div className="ml-auto flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative size-8"
-          aria-label="Notifications"
-          onClick={handleNotificationClick}
-        >
-          <Bell className="size-4" />
-          <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-primary" />
-        </Button>
+        <NotificationsMenu />
 
         <ThemeToggle />
 
@@ -80,6 +66,9 @@ export function Header() {
               aria-label="Account"
             >
               <Avatar className="size-7">
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt={name} />
+                ) : null}
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </Button>

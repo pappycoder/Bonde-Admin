@@ -1,8 +1,6 @@
-import { ActivityLog } from "@/components/dashboard/activity-log";
+import { ActivityLogPanel } from "@/components/dashboard/activity-log-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
-
-import { activities } from "@/lib/mock-data";
 
 export default function ActivitiesPage() {
   return (
@@ -14,7 +12,7 @@ export default function ActivitiesPage() {
         />
       </FadeIn>
 
-      <ActivityLog activities={activities} />
+      <ActivityLogPanel />
     </div>
   );
 }

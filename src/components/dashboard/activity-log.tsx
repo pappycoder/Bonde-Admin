@@ -3,7 +3,7 @@
 import { cn } from "cn";
 import { motion } from "motion/react";
 
-import type { Activity } from "@/lib/mock-data";
+import type { ActivityItem } from "@/lib/api/audit-logs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,7 +41,7 @@ export function ActivityLog({
   title = "Activity log",
   description = "Every action taken across the platform.",
 }: {
-  activities: Activity[];
+  activities: ActivityItem[];
   title?: string;
   description?: string;
 }) {

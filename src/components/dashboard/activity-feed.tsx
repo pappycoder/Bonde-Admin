@@ -4,7 +4,7 @@ import { cn } from "cn";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
-import type { Activity } from "@/lib/mock-data";
+import type { ActivityItem } from "@/lib/api/audit-logs";
 import { Stagger } from "@/components/motion/stagger";
 import { StaggerItem } from "@/components/motion/stagger-item";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ export function ActivityFeed({
   activities,
   className,
 }: {
-  activities: Activity[];
+  activities: ActivityItem[];
   className?: string;
 }) {
   return (
