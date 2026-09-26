@@ -69,8 +69,44 @@ export type AdminUserNames = Record<string, string>;
 
 export type AdminReviewStatus = "APPROVED" | "DECLINED";
 
+export interface AdminStats {
+  totals: {
+    users: number;
+    activeUsers: number;
+    pendingUsers: number;
+    suspendedUsers: number;
+    newUsers30d: number;
+    newUsersPrev30d: number;
+    transactions30d: number;
+    volume: string;
+    volume30d: string;
+    volumePrev30d: string;
+    deposits30d: string;
+    depositsPrev30d: string;
+    pendingReviews: number;
+  };
+  /** Last 12 month buckets, oldest first. Amounts are fixed 2-decimal strings. */
+  revenue: Array<{
+    month: string;
+    revenue: string;
+    expenses: string;
+    volume: string;
+  }>;
+  /** Last 7 calendar days, oldest first. */
+  weekly: Array<{ day: string; transactions: number }>;
+}
+
 export function listAdminUsers(query?: ListQuery): Promise<ApiList<AdminUser>> {
   return api.list<AdminUser>("/admin/users", query);
+}
+
+export function getAdminStats(): Promise<AdminStats> {
+  return api.get<AdminStats>("/admin/stats", { auth: true });
+}
+
+/** Dashboard/analytics KPIs: totals, monthly series and 7-day volume. */
+export function useAdminStats() {
+  return useApi<AdminStats>(getAdminStats, []);
 }
 
 export function getAdminUser(id: string): Promise<AdminUserDetail> {
