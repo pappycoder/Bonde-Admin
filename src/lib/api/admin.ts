@@ -67,12 +67,28 @@ export interface AdminTransactionDetail extends AdminTransaction {
 
 export type AdminUserNames = Record<string, string>;
 
+export type AdminReviewStatus = "APPROVED" | "DECLINED";
+
 export function listAdminUsers(query?: ListQuery): Promise<ApiList<AdminUser>> {
   return api.list<AdminUser>("/admin/users", query);
 }
 
 export function getAdminUser(id: string): Promise<AdminUserDetail> {
   return api.get<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`, { auth: true });
+}
+
+/** Deactivates the user's 1:1 account + wallet. Idempotent server-side. */
+export function suspendAdminUser(id: string, reason?: string): Promise<AdminUserDetail> {
+  return api.post<AdminUserDetail>(
+    `/admin/users/${encodeURIComponent(id)}/suspend`,
+    reason ? { reason } : {},
+    { auth: true },
+  );
+}
+
+/** Reactivates a suspended user's 1:1 account + wallet. Idempotent server-side. */
+export function restoreAdminUser(id: string): Promise<AdminUserDetail> {
+  return api.post<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}/restore`, {}, { auth: true });
 }
 
 export function getUserNames(ids: string[]): Promise<AdminUserNames> {
@@ -92,6 +108,19 @@ export function getAdminTransaction(id: string): Promise<AdminTransactionDetail>
   return api.get<AdminTransactionDetail>(`/admin/transactions/${encodeURIComponent(id)}`, {
     auth: true,
   });
+}
+
+/** Records an admin approval/decline on an in-flight transaction. */
+export function reviewAdminTransaction(
+  id: string,
+  status: AdminReviewStatus,
+  notes?: string,
+): Promise<AdminTransactionDetail> {
+  return api.post<AdminTransactionDetail>(
+    `/admin/transactions/${encodeURIComponent(id)}/approval`,
+    notes ? { status, notes } : { status },
+    { auth: true },
+  );
 }
 
 /**

@@ -4,13 +4,17 @@ import { cn } from "cn";
 import {
   ArrowLeft,
   Banknote,
+  Check,
   CheckCircle2,
   CreditCard,
   Landmark,
   Link2,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { ErrorState, LoadingState } from "@/components/data/state";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +27,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useApi } from "@/hooks/use-api";
-import type { AdminTxStatus, AdminTxType } from "@/lib/api/admin";
-import { getAdminTransaction } from "@/lib/api/admin";
+import type { AdminReviewStatus, AdminTxStatus, AdminTxType } from "@/lib/api/admin";
+import { getAdminTransaction, reviewAdminTransaction } from "@/lib/api/admin";
+import { ApiError } from "@/lib/api-client";
 import { timeAgo } from "@/lib/format";
 
 const TYPE_META: Record<AdminTxType, { label: string; icon: typeof Banknote }> = {
@@ -61,6 +66,7 @@ export function TransactionDetailView({ transactionId }: { transactionId: string
     () => getAdminTransaction(transactionId),
     [transactionId],
   );
+  const [acting, setActing] = useState(false);
 
   if (loading && !data) {
     return <LoadingState className="py-24" />;
@@ -82,6 +88,30 @@ export function TransactionDetailView({ transactionId }: { transactionId: string
   const Icon = meta.icon;
   const isCredit = tx.type === "deposit";
   const settled = STATUS_LABEL[tx.status];
+  const reviewable = tx.approvalStatus === "PENDING";
+
+  async function review(status: AdminReviewStatus) {
+    setActing(true);
+    try {
+      await reviewAdminTransaction(tx.id, status);
+      toast.success(
+        status === "APPROVED" ? "Transaction approved" : "Transaction declined",
+        {
+          description:
+            status === "APPROVED"
+              ? "The approval was recorded and the transaction is cleared to settle."
+              : "The approval was recorded and the movement is refused.",
+        },
+      );
+      void refresh();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not record the decision",
+      );
+    } finally {
+      setActing(false);
+    }
+  }
 
   const steps = [
     {
@@ -130,8 +160,34 @@ export function TransactionDetailView({ transactionId }: { transactionId: string
                 {timeAgo(tx.createdAt)} · via {tx.method}
               </CardDescription>
             </div>
-            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Icon className="size-5" />
+            <div className="flex items-center gap-2">
+              {reviewable ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => void review("DECLINED")}
+                    disabled={acting}
+                  >
+                    <X className="size-4" />
+                    Decline
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => void review("APPROVED")}
+                    disabled={acting}
+                  >
+                    <Check className="size-4" />
+                    Approve
+                  </Button>
+                </>
+              ) : (
+                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="size-5" />
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent>

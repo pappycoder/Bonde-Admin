@@ -3,16 +3,30 @@
 import { cn } from "cn";
 import {
   ArrowLeft,
+  Ban,
   Building2,
   CalendarDays,
   Clock,
   Fingerprint,
   Mail,
   ShieldCheck,
+  UserCheck,
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ErrorState, LoadingState } from "@/components/data/state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +48,8 @@ import {
 } from "@/components/ui/table";
 import { useApi } from "@/hooks/use-api";
 import type { AdminUserStatus, AdminTxStatus, AdminTxType } from "@/lib/api/admin";
-import { getAdminUser } from "@/lib/api/admin";
+import { getAdminUser, restoreAdminUser, suspendAdminUser } from "@/lib/api/admin";
+import { ApiError } from "@/lib/api-client";
 import { formatMoney, formatMonthYear, initialsOf, timeAgo } from "@/lib/format";
 
 const STATUS_CLASSES: Record<AdminUserStatus, string> = {
@@ -69,6 +84,8 @@ export function UserDetailView({ userId }: { userId: string }) {
     () => getAdminUser(userId),
     [userId],
   );
+  const [suspendOpen, setSuspendOpen] = useState(false);
+  const [acting, setActing] = useState(false);
 
   if (loading && !data) {
     return <LoadingState className="py-24" />;
@@ -87,6 +104,41 @@ export function UserDetailView({ userId }: { userId: string }) {
 
   const { user, txs } = { user: data, txs: data.recentTransactions };
 
+  async function handleSuspend() {
+    setActing(true);
+    try {
+      await suspendAdminUser(user.id);
+      toast.success("User suspended", {
+        description: `${user.fullName} can no longer transact.`,
+      });
+      setSuspendOpen(false);
+      void refresh();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not suspend this user",
+      );
+    } finally {
+      setActing(false);
+    }
+  }
+
+  async function handleRestore() {
+    setActing(true);
+    try {
+      await restoreAdminUser(user.id);
+      toast.success("User restored", {
+        description: `${user.fullName} can transact again.`,
+      });
+      void refresh();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not restore this user",
+      );
+    } finally {
+      setActing(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-2">
@@ -100,8 +152,8 @@ export function UserDetailView({ userId }: { userId: string }) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader className="space-y-4">
-            <div className="flex flex-wrap items-center gap-4">
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4 space-y-0">
+            <div className="flex items-center gap-4">
               <Avatar className="size-14">
                 <AvatarFallback className="text-base">
                   {initialsOf(user.fullName)}
@@ -125,6 +177,31 @@ export function UserDetailView({ userId }: { userId: string }) {
                   {user.email}
                 </CardDescription>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {user.status === "suspended" ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => void handleRestore()}
+                  disabled={acting}
+                >
+                  <UserCheck className="size-4" />
+                  Restore access
+                </Button>
+              ) : (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setSuspendOpen(true)}
+                  disabled={acting}
+                >
+                  <Ban className="size-4" />
+                  Suspend user
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -270,6 +347,25 @@ export function UserDetailView({ userId }: { userId: string }) {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={suspendOpen} onOpenChange={setSuspendOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend {user.fullName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Their account and wallet will be deactivated, blocking all
+              deposits, withdrawals and transfers. You can restore access at any
+              time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={acting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={acting} onClick={() => void handleSuspend()}>
+              Suspend
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
