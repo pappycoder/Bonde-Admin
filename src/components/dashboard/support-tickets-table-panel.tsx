@@ -3,7 +3,7 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
 
-import { UsersTable } from "@/components/dashboard/users-table";
+import { SupportTicketsTable } from "@/components/dashboard/support-tickets-table";
 import { EmptyState, ErrorState, LoadingState } from "@/components/data/state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,26 +16,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useList } from "@/hooks/use-list";
-import type { AdminUser, AdminUserStatus } from "@/lib/api/admin";
+import type { AdminSupportTicket, SupportTicketStatus } from "@/lib/api/admin";
 
-const STATUS_OPTIONS: { value: AdminUserStatus | "all"; label: string }[] = [
+const STATUS_OPTIONS: { value: SupportTicketStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
-  { value: "active", label: "Active" },
-  { value: "pending", label: "Pending" },
-  { value: "suspended", label: "Suspended" },
+  { value: "OPEN", label: "Open" },
+  { value: "PENDING", label: "Pending" },
+  { value: "RESOLVED", label: "Resolved" },
 ];
 
-export function UsersTablePanel({
-  title = "All users",
-  description = "Monitor who is active across the platform.",
+export function SupportTicketsTablePanel({
+  title = "All tickets",
+  description = "Complaints, requests and help conversations.",
 }: {
   title?: string;
   description?: string;
 }) {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<AdminUserStatus | "all">("all");
-  const { data, error, loading, setQuery, setPage, refresh } = useList<AdminUser>(
-    "/admin/users",
+  const [status, setStatus] = useState<SupportTicketStatus | "all">("all");
+  const { data, error, loading, setQuery, setPage, refresh } = useList<AdminSupportTicket>(
+    "/admin/support-tickets",
     { pageSize: 20 },
   );
 
@@ -44,12 +44,12 @@ export function UsersTablePanel({
     setQuery((prev) => ({ ...prev, q: value.trim() || undefined, page: 1 }));
   };
 
-  const applyStatus = (value: AdminUserStatus | "all") => {
+  const applyStatus = (value: SupportTicketStatus | "all") => {
     setStatus(value);
     setQuery((prev) => ({ ...prev, page: 1, status: value === "all" ? undefined : value }));
   };
 
-  const users = data?.items ?? [];
+  const tickets = data?.items ?? [];
   const page = data?.page ?? 0;
   const totalPages = data?.totalPages ?? 0;
 
@@ -68,7 +68,7 @@ export function UsersTablePanel({
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search users…"
+              placeholder="Search tickets…"
               className="pl-8"
             />
           </div>
@@ -76,7 +76,10 @@ export function UsersTablePanel({
             Search
           </Button>
         </form>
-        <Select value={status} onValueChange={(value) => applyStatus(value as AdminUserStatus | "all")}>
+        <Select
+          value={status}
+          onValueChange={(value) => applyStatus(value as SupportTicketStatus | "all")}
+        >
           <SelectTrigger size="sm" className="w-40">
             <SelectValue />
           </SelectTrigger>
@@ -100,13 +103,13 @@ export function UsersTablePanel({
             <LoadingState />
           ) : error && !data ? (
             <ErrorState message={error.message} onRetry={() => void refresh()} />
-          ) : users.length === 0 ? (
+          ) : tickets.length === 0 ? (
             <EmptyState
-              title="No users found"
+              title="No tickets found"
               description="Try a different search or status filter."
             />
           ) : (
-            <UsersTable users={users} />
+            <SupportTicketsTable tickets={tickets} />
           )}
         </CardContent>
       </Card>

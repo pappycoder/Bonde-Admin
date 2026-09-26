@@ -15,7 +15,7 @@ import {
 type StatCardProps = {
   title: string;
   value: string;
-  delta: string;
+  delta?: string;
   trend?: "up" | "down";
   icon: ReactNode;
   sublabel?: string;
@@ -45,17 +45,19 @@ export function StatCard({
         <CardContent>
           <div className="text-2xl font-semibold tracking-tight">{value}</div>
           <p className="mt-1 flex items-center gap-1.5 text-xs">
-            <span
-              className={cn(
-                "inline-flex items-center gap-0.5 font-medium",
-                trend === "down"
-                  ? "text-destructive"
-                  : "text-emerald-600 dark:text-emerald-400",
-              )}
-            >
-              <TrendIcon className="size-3.5" />
-              {delta}
-            </span>
+            {delta ? (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-0.5 font-medium",
+                  trend === "down"
+                    ? "text-destructive"
+                    : "text-emerald-600 dark:text-emerald-400",
+                )}
+              >
+                <TrendIcon className="size-3.5" />
+                {delta}
+              </span>
+            ) : null}
             {sublabel ? (
               <span className="text-muted-foreground">{sublabel}</span>
             ) : null}

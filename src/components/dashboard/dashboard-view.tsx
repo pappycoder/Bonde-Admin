@@ -3,6 +3,7 @@
 import {
   CircleDollarSign,
   Landmark,
+  MessagesSquare,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -52,7 +53,7 @@ export function DashboardView() {
         )
       ) : (
         <>
-          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <StatCard
               title="Active users"
               value={data.totals.activeUsers.toLocaleString()}
@@ -102,6 +103,12 @@ export function DashboardView() {
               ) >= 0 ? "up" : "down"}
               sublabel="vs previous 30 days"
               icon={<UserPlus className="size-4" />}
+            />
+            <StatCard
+              title="Open tickets"
+              value={data.totals.openTickets.toLocaleString()}
+              sublabel="awaiting a response"
+              icon={<MessagesSquare className="size-4" />}
             />
           </Stagger>
 

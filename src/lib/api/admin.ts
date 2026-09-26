@@ -84,6 +84,7 @@ export interface AdminStats {
     deposits30d: string;
     depositsPrev30d: string;
     pendingReviews: number;
+    openTickets: number;
   };
   /** Last 12 month buckets, oldest first. Amounts are fixed 2-decimal strings. */
   revenue: Array<{
@@ -111,6 +112,85 @@ export function useAdminStats() {
 
 export function getAdminUser(id: string): Promise<AdminUserDetail> {
   return api.get<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`, { auth: true });
+}
+
+export type SupportTicketStatus = "OPEN" | "PENDING" | "RESOLVED";
+export type SupportTicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+export type SupportMessageRole = "USER" | "SUPPORT";
+
+export interface AdminSupportTicket {
+  id: string;
+  subject: string;
+  status: SupportTicketStatus;
+  priority: SupportTicketPriority;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  assigneeId: string | null;
+  assigneeName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSupportMessage {
+  id: string;
+  role: SupportMessageRole;
+  body: string;
+  authorName: string | null;
+  createdAt: string;
+}
+
+export interface AdminSupportTicketDetail extends AdminSupportTicket {
+  messages: AdminSupportMessage[];
+}
+
+export interface CreateSupportTicketInput {
+  userId: string;
+  subject: string;
+  priority?: SupportTicketPriority;
+  message?: string;
+}
+
+/** `/admin/support-tickets` accepts the shared list params plus `status`. */
+export interface SupportTicketListQuery extends ListQuery {
+  status?: SupportTicketStatus;
+}
+
+/** Support inbox: paged list with a free-text `q` and an optional `status` filter. */
+export function listAdminSupportTickets(query?: SupportTicketListQuery): Promise<ApiList<AdminSupportTicket>> {
+  return api.list<AdminSupportTicket>("/admin/support-tickets", query);
+}
+
+export function getAdminSupportTicket(id: string): Promise<AdminSupportTicketDetail> {
+  return api.get<AdminSupportTicketDetail>(`/admin/support-tickets/${encodeURIComponent(id)}`, {
+    auth: true,
+  });
+}
+
+/** Opens a ticket on a user's behalf, optionally with their first message. */
+export function createAdminSupportTicket(
+  input: CreateSupportTicketInput,
+): Promise<AdminSupportTicketDetail> {
+  return api.post<AdminSupportTicketDetail>("/admin/support-tickets", input, { auth: true });
+}
+
+export function replyAdminSupportTicket(id: string, body: string): Promise<AdminSupportTicketDetail> {
+  return api.post<AdminSupportTicketDetail>(
+    `/admin/support-tickets/${encodeURIComponent(id)}/messages`,
+    { body },
+    { auth: true },
+  );
+}
+
+export function updateAdminSupportTicketStatus(
+  id: string,
+  status: SupportTicketStatus,
+): Promise<AdminSupportTicketDetail> {
+  return api.patch<AdminSupportTicketDetail>(
+    `/admin/support-tickets/${encodeURIComponent(id)}/status`,
+    { status },
+    { auth: true },
+  );
 }
 
 /** Deactivates the user's 1:1 account + wallet. Idempotent server-side. */

@@ -24,6 +24,8 @@ export interface ListQuery {
   q?: string;
   orderBy?: string;
   filter?: string | string[];
+  /** Dedicated status param, used by the admin users and support tickets lists. */
+  status?: string;
 }
 
 export interface ApiList<T> {
@@ -40,6 +42,7 @@ export function buildListQuery(query: ListQuery = {}): string {
   if (query.pageSize != null) params.set("pageSize", String(query.pageSize));
   if (query.q) params.set("q", query.q);
   if (query.orderBy) params.set("orderBy", query.orderBy);
+  if (query.status) params.set("status", query.status);
   const filters = Array.isArray(query.filter) ? query.filter : [query.filter];
   for (const filter of filters) {
     if (filter) params.append("filter", filter);

@@ -1,8 +1,6 @@
-import { SupportTicketsTable } from "@/components/dashboard/support-tickets-table";
+import { SupportTicketsTablePanel } from "@/components/dashboard/support-tickets-table-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
-import { tickets } from "@/lib/mock-data";
-import { Button } from "@/components/ui/button";
 
 export default function SupportPage() {
   return (
@@ -11,12 +9,10 @@ export default function SupportPage() {
         <PageHeader
           title="Support"
           description="Complaints, requests and help conversations from users."
-        >
-          <Button size="sm">New response</Button>
-        </PageHeader>
+        />
       </FadeIn>
 
-      <SupportTicketsTable tickets={tickets} />
+      <SupportTicketsTablePanel />
     </div>
   );
 }
