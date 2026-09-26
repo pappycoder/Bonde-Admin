@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, KeyRound, Laptop, Loader2, ShieldCheck, Smartphone } from "lucide-react";
+import { Camera, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { LoadingState } from "@/components/data/state";
 import { PageHeader } from "@/components/layout/page-header";
 import { siteConfig } from "@/config/site";
+import { PasswordForm } from "@/components/account/password-form";
+import { SessionsCard } from "@/components/account/sessions-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,23 +36,6 @@ import {
 } from "@/lib/api/profile";
 import { useApi } from "@/hooks/use-api";
 
-const sessions = [
-  {
-    id: "windows-chrome",
-    device: "Windows · Chrome",
-    location: "Lagos, NG",
-    current: true,
-    icon: Laptop,
-  },
-  {
-    id: "ios-app",
-    device: "iOS · Bonde Admin app",
-    location: "Lagos, NG",
-    current: false,
-    icon: Smartphone,
-  },
-];
-
 const PHONE_PATTERN = /^\+?[0-9]+$/;
 
 function initialsOf(name: string): string {
@@ -68,10 +53,12 @@ function messageOf(error: unknown): string {
 
 export default function ProfilePage() {
   const { user, updateProfileDisplay } = useAuth();
-  const { data: profile, loading: profileLoading } = useApi(() => getProfile(), []);
+  const { data: profile, loading: profileLoading } = useApi(
+    () => getProfile(),
+    [],
+  );
 
   const [twoFactor, setTwoFactor] = useState(true);
-  const [sessionsList, setSessionsList] = useState(sessions);
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -127,7 +114,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file || !user) return;
@@ -166,20 +155,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handlePassword = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    toast.success("Password changed", {
-      description: "Your password was updated successfully.",
-    });
-  };
-
-  const handleRevoke = (id: string) => {
-    setSessionsList((prev) => prev.filter((s) => s.id !== id));
-    toast.success("Session revoked", {
-      description: "The device has been signed out.",
-    });
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -192,7 +167,9 @@ export default function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle>Profile information</CardTitle>
-              <CardDescription>Your name, email address and role.</CardDescription>
+              <CardDescription>
+                Your name, email address and role.
+              </CardDescription>
             </CardHeader>
             {profileLoading && !profile ? (
               <CardContent>
@@ -204,7 +181,9 @@ export default function ProfilePage() {
                   <div className="flex items-start gap-4">
                     <div className="relative">
                       <Avatar className="size-14">
-                        {effectiveAvatar ? <AvatarImage src={effectiveAvatar} alt={name} /> : null}
+                        {effectiveAvatar ? (
+                          <AvatarImage src={effectiveAvatar} alt={name} />
+                        ) : null}
                         <AvatarFallback>{initials}</AvatarFallback>
                       </Avatar>
                       <input
@@ -237,7 +216,9 @@ export default function ProfilePage() {
                       >
                         {role}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{email}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {email}
+                      </span>
                     </div>
                   </div>
                   <Separator />
@@ -282,38 +263,7 @@ export default function ProfilePage() {
             )}
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <KeyRound className="size-4" />
-                Security
-              </CardTitle>
-              <CardDescription>Change your password to keep your account safe.</CardDescription>
-            </CardHeader>
-            <form onSubmit={handlePassword}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="p-current">Current password</Label>
-                  <Input id="p-current" type="password" autoComplete="current-password" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="p-new">New password</Label>
-                    <Input id="p-new" type="password" autoComplete="new-password" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-confirm">Confirm new password</Label>
-                    <Input id="p-confirm" type="password" autoComplete="new-password" />
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="justify-end">
-                <Button type="submit" size="sm">
-                  Update password
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+          <PasswordForm />
         </div>
 
         <div className="space-y-4">
@@ -346,44 +296,7 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Sessions</CardTitle>
-              <CardDescription>Devices signed in to your account.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {sessionsList.map((session, index) => (
-                <div key={session.id}>
-                  {index > 0 ? <Separator className="my-1" /> : null}
-                  <div className="flex items-center justify-between gap-3 py-2">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <session.icon className="size-4" />
-                      </div>
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-medium">{session.device}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {session.location}
-                        </p>
-                      </div>
-                    </div>
-                    {session.current ? (
-                      <Badge variant="secondary">This device</Badge>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-muted-foreground"
-                        onClick={() => handleRevoke(session.id)}
-                      >
-                        Revoke
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <SessionsCard />
         </div>
       </div>
     </div>

@@ -8,11 +8,8 @@ import {
   toAuthUser,
   type AuthUser,
 } from "@/lib/auth/auth-api";
-import {
-  clearSession,
-  loadSession,
-  saveSession,
-} from "@/lib/auth/session";
+import { logoutSession } from "@/lib/api/security";
+import { clearSession, loadSession, saveSession } from "@/lib/auth/session";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -21,7 +18,10 @@ interface AuthContextValue {
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
-  updateProfileDisplay: (input: { name?: string; avatarUrl?: string | null }) => void;
+  updateProfileDisplay: (input: {
+    name?: string;
+    avatarUrl?: string | null;
+  }) => void;
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -79,6 +79,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function logout(): void {
+    // Best-effort: the API revokes this session server-side so other refreshes fail.
+    void logoutSession().catch(() => undefined);
     clearSession();
     setUser(null);
   }
@@ -104,7 +106,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ...current,
         name,
         initials: initials.toUpperCase(),
-        avatarUrl: input.avatarUrl !== undefined ? input.avatarUrl : current.avatarUrl,
+        avatarUrl:
+          input.avatarUrl !== undefined ? input.avatarUrl : current.avatarUrl,
       };
     });
   }

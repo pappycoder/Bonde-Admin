@@ -28,11 +28,20 @@ export interface ActivityItem {
   createdAt: number;
 }
 
-export function listAdminAuditLogs(query?: ListQuery): Promise<ApiList<AdminAuditLog>> {
+export function listAdminAuditLogs(
+  query?: ListQuery,
+): Promise<ApiList<AdminAuditLog>> {
   return api.list<AdminAuditLog>("/admin/audit-logs", query);
 }
 
-const WARNING_ACTIONS = ["denied", "flagged", "suspend", "withdraw", "reversal", "fail"];
+const WARNING_ACTIONS = [
+  "denied",
+  "flagged",
+  "suspend",
+  "withdraw",
+  "reversal",
+  "fail",
+];
 const PRIMARY_ACTIONS = ["login", "register", "revoke", "lock"];
 
 function toneOf(action: string): NonNullable<ActivityItem["tone"]> {
@@ -52,12 +61,17 @@ function statusOf(action: string): string {
 function humanizeAction(action: string): string {
   const parts = action.split(".").map((part, index) => {
     const legible = part.replace(/_/g, " ");
-    return index === 0 ? legible.charAt(0).toUpperCase() + legible.slice(1) : legible;
+    return index === 0
+      ? legible.charAt(0).toUpperCase() + legible.slice(1)
+      : legible;
   });
   return parts.join(" · ");
 }
 
-function actorOf(log: AdminAuditLog, names?: AdminUserNames): { actor: string; initials: string } {
+function actorOf(
+  log: AdminAuditLog,
+  names?: AdminUserNames,
+): { actor: string; initials: string } {
   if (!log.userId) return { actor: "System", initials: "SY" };
   const fullName = names?.[log.userId];
   if (fullName) return { actor: fullName, initials: initialsOf(fullName) };
@@ -65,12 +79,14 @@ function actorOf(log: AdminAuditLog, names?: AdminUserNames): { actor: string; i
   return { actor: `User ${short}`, initials: short.slice(0, 2).toUpperCase() };
 }
 
-function parseDevice(userAgent: string): string {
+/** "Windows · Chrome" from a raw user-agent; shared with the sessions view. */
+export function parseDevice(userAgent: string): string {
   let os = "Unknown OS";
   if (userAgent.includes("Windows")) os = "Windows";
   else if (userAgent.includes("Mac")) os = "macOS";
   else if (userAgent.includes("Android")) os = "Android";
-  else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) os = "iOS";
+  else if (userAgent.includes("iPhone") || userAgent.includes("iPad"))
+    os = "iOS";
   else if (userAgent.includes("Linux")) os = "Linux";
 
   let browser = "Unknown";
