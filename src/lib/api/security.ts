@@ -50,3 +50,50 @@ export function changePassword(input: {
 export function logoutSession(): Promise<{ status: "signed_out" }> {
   return api.post<{ status: "signed_out" }>("/auth/logout", {}, { auth: true });
 }
+
+export interface TwoFactorStatus {
+  enabled: boolean;
+  enrolledAt: string | null;
+  recoveryCodesRemaining: number;
+}
+
+export interface TwoFactorSetup {
+  secret: string;
+  otpauthUri: string;
+}
+
+export function getTwoFactorStatus(): Promise<TwoFactorStatus> {
+  return api.get<TwoFactorStatus>("/auth/2fa", { auth: true });
+}
+
+/** Starts enrolment; re-checks the password so a hijacked session cannot enrol. */
+export function startTwoFactorSetup(password: string): Promise<TwoFactorSetup> {
+  return api.post<TwoFactorSetup>(
+    "/auth/2fa/setup",
+    { password },
+    { auth: true },
+  );
+}
+
+/** Confirms enrolment. The recovery codes are returned exactly once. */
+export function enableTwoFactor(
+  code: string,
+): Promise<{ recoveryCodes: string[] }> {
+  return api.post<{ recoveryCodes: string[] }>(
+    "/auth/2fa/enable",
+    { code },
+    { auth: true },
+  );
+}
+
+/** Turns the factor off; needs the password and a current code. */
+export function disableTwoFactor(input: {
+  password: string;
+  code: string;
+}): Promise<{ status: string }> {
+  return api.post<{ status: string }>(
+    "/auth/2fa/disable",
+    { password: input.password, code: input.code },
+    { auth: true },
+  );
+}

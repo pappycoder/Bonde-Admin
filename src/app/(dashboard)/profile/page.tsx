@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, Loader2, ShieldCheck } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { LoadingState } from "@/components/data/state";
@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { siteConfig } from "@/config/site";
 import { PasswordForm } from "@/components/account/password-form";
 import { SessionsCard } from "@/components/account/sessions-card";
+import { TwoFactorCard } from "@/components/account/two-factor-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/lib/auth/auth-provider";
 import {
   AVATAR_CONTENT_TYPES,
@@ -57,8 +57,6 @@ export default function ProfilePage() {
     () => getProfile(),
     [],
   );
-
-  const [twoFactor, setTwoFactor] = useState(true);
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -267,34 +265,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="size-4" />
-                Two-factor authentication
-              </CardTitle>
-              <CardDescription>
-                Require a verification code when signing in.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between">
-              <Label htmlFor="two-factor" className="font-medium">
-                Enabled
-              </Label>
-              <Switch
-                id="two-factor"
-                checked={twoFactor}
-                onCheckedChange={(checked) => {
-                  setTwoFactor(checked);
-                  toast.success(checked ? "2FA enabled" : "2FA disabled", {
-                    description: checked
-                      ? "A code will be required at sign-in."
-                      : "Sign-in codes are no longer required.",
-                  });
-                }}
-              />
-            </CardContent>
-          </Card>
+          <TwoFactorCard />
 
           <SessionsCard />
         </div>

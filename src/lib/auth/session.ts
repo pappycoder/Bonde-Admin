@@ -26,7 +26,9 @@ export function saveSession(next: Omit<Session, "issuedAt">): void {
   const session: Session = { ...next, issuedAt: Date.now() };
   const remember = next.remember !== false;
   storageFor(remember)?.setItem(SESSION_KEY, JSON.stringify(session));
-  const other: Storage | null = remember ? window.sessionStorage : window.localStorage;
+  const other: Storage | null = remember
+    ? window.sessionStorage
+    : window.localStorage;
   other?.removeItem(SESSION_KEY);
 }
 

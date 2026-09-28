@@ -25,11 +25,40 @@ export interface AuthUser {
   avatarUrl: string | null;
 }
 
-export async function login(email: string, password: string): Promise<Session> {
-  return api.post<Session>("/auth/login", { email, password });
+/**
+ * What `POST /api/auth/login` returns: a full session, or a parked login that
+ * still needs a second factor.
+ */
+export type LoginResult = Session | MfaChallenge;
+
+export interface MfaChallenge {
+  mfaRequired: true;
+  challengeId: string;
+  expiresIn: number;
 }
 
-export async function forgotPassword(email: string): Promise<{ status: "sent" }> {
+export function isMfaChallenge(result: LoginResult): result is MfaChallenge {
+  return "mfaRequired" in result;
+}
+
+export async function login(
+  email: string,
+  password: string,
+): Promise<LoginResult> {
+  return api.post<LoginResult>("/auth/login", { email, password });
+}
+
+/** Completes a parked login with an authenticator or recovery code. */
+export async function verifyLoginMfa(
+  challengeId: string,
+  code: string,
+): Promise<Session> {
+  return api.post<Session>("/auth/login/mfa", { challengeId, code });
+}
+
+export async function forgotPassword(
+  email: string,
+): Promise<{ status: "sent" }> {
   return api.post<{ status: "sent" }>("/auth/forgot-password", { email });
 }
 
@@ -37,7 +66,10 @@ export async function verifyResetOtp(
   email: string,
   code: string,
 ): Promise<{ resetToken: string }> {
-  return api.post<{ resetToken: string }>("/auth/verify-reset-otp", { email, code });
+  return api.post<{ resetToken: string }>("/auth/verify-reset-otp", {
+    email,
+    code,
+  });
 }
 
 export async function resetPassword(
