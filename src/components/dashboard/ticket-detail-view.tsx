@@ -138,14 +138,14 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
             >
               <Avatar className="size-5">
                 <AvatarFallback className="text-[8px]">
-                  {initialsOf(ticket.userName)}
+                  {initialsOf(ticket.user)}
                 </AvatarFallback>
               </Avatar>
-              {ticket.userName}
+              {ticket.user ?? ticket.userEmail ?? "Unknown user"}
             </Link>
             <span className="inline-flex items-center gap-1.5">
               <UserRound className="size-3.5" />
-              {ticket.assigneeName ?? "Unassigned"}
+              {ticket.assignee ?? "Unassigned"}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="size-3.5" />
@@ -199,7 +199,11 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
             </p>
           ) : (
             ticket.messages.map((message) => (
-              <MessageBubble key={message.id} message={message} userName={ticket.userName} />
+              <MessageBubble
+                key={message.id}
+                message={message}
+                userName={ticket.user ?? ticket.userEmail}
+              />
             ))
           )}
           <Separator />
@@ -224,7 +228,7 @@ function MessageBubble({
   userName,
 }: {
   message: AdminSupportMessage;
-  userName: string;
+  userName: string | null;
 }) {
   const isUser = message.role === "USER";
   return (
@@ -238,7 +242,7 @@ function MessageBubble({
       >
         <div className="mb-1 flex items-center gap-2 text-xs">
           <span className="font-medium">
-            {isUser ? userName : (message.authorName ?? "Support")}
+            {isUser ? (userName ?? "You") : "Support"}
           </span>
           <span className="text-muted-foreground">{timeAgo(message.createdAt)}</span>
         </div>

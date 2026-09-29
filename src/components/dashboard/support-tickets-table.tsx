@@ -73,10 +73,12 @@ export function SupportTicketsTable({ tickets }: { tickets: AdminSupportTicket[]
               <div className="flex items-center gap-2.5">
                 <Avatar className="size-7">
                   <AvatarFallback className="text-[10px]">
-                    {initialsOf(ticket.userName)}
+                    {initialsOf(ticket.user)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="whitespace-nowrap">{ticket.userName}</span>
+                <span className="whitespace-nowrap">
+                  {ticket.user ?? ticket.userEmail ?? "Unknown user"}
+                </span>
               </div>
             </TableCell>
             <TableCell>
@@ -109,7 +111,7 @@ export function SupportTicketsTable({ tickets }: { tickets: AdminSupportTicket[]
               </Badge>
             </TableCell>
             <TableCell className="hidden whitespace-nowrap text-muted-foreground lg:table-cell">
-              {ticket.assigneeName ?? "Unassigned"}
+              {ticket.assignee ?? "Unassigned"}
             </TableCell>
           </motion.tr>
         ))}

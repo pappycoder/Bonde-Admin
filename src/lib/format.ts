@@ -13,7 +13,8 @@ export function timeAgo(iso: string | Date): string {
   ];
   for (const [name, size] of units) {
     const value = Math.floor(seconds / size);
-    if (value >= 1) return value === 1 ? `1 ${name} ago` : `${value} ${name}s ago`;
+    if (value >= 1)
+      return value === 1 ? `1 ${name} ago` : `${value} ${name}s ago`;
   }
   return "just now";
 }
@@ -37,9 +38,9 @@ export function formatMoney(value: number | string, currency = "NGN"): string {
 }
 
 /** Up to two initials from a full name, e.g. "Olivia Martin" → "OM". */
-export function initialsOf(name: string): string {
+export function initialsOf(name: string | null | undefined): string {
   return (
-    name
+    (name ?? "")
       .split(/\s+/)
       .filter(Boolean)
       .slice(0, 2)
@@ -55,5 +56,8 @@ export function shortId(id: string): string {
 
 /** e.g. "Aug 2026" — used for the joined-on date. */
 export function formatMonthYear(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
 }

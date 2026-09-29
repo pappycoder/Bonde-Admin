@@ -5,7 +5,8 @@ import { useApi } from "@/hooks/use-api";
 export type AdminUserStatus = "active" | "pending" | "suspended";
 
 export type AdminTxType = "deposit" | "withdrawal" | "transfer" | "payment";
-export type AdminTxStatus = "completed" | "processing" | "pending" | "failed" | "flagged";
+export type AdminTxStatus =
+  "completed" | "processing" | "pending" | "failed" | "flagged";
 export type AdminApprovalStatus = "PENDING" | "APPROVED" | "DECLINED";
 
 export interface AdminUser {
@@ -53,8 +54,19 @@ export interface AdminTransaction extends AdminTxSummary {
 }
 
 export interface AdminTransactionDetail extends AdminTransaction {
-  wallet: { id: string; balance: string; currency: string; isActive: boolean } | null;
-  card: { id: string; cardNumberLast4: string; cardType: string; status: string; createdAt: string } | null;
+  wallet: {
+    id: string;
+    balance: string;
+    currency: string;
+    isActive: boolean;
+  } | null;
+  card: {
+    id: string;
+    cardNumberLast4: string;
+    cardType: string;
+    status: string;
+    createdAt: string;
+  } | null;
   approvals: Array<{
     id: string;
     status: AdminApprovalStatus;
@@ -111,7 +123,9 @@ export function useAdminStats() {
 }
 
 export function getAdminUser(id: string): Promise<AdminUserDetail> {
-  return api.get<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`, { auth: true });
+  return api.get<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`, {
+    auth: true,
+  });
 }
 
 export type SupportTicketStatus = "OPEN" | "PENDING" | "RESOLVED";
@@ -124,10 +138,9 @@ export interface AdminSupportTicket {
   status: SupportTicketStatus;
   priority: SupportTicketPriority;
   userId: string;
-  userName: string;
-  userEmail: string;
-  assigneeId: string | null;
-  assigneeName: string | null;
+  user: string | null;
+  userEmail: string | null;
+  assignee: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -136,7 +149,6 @@ export interface AdminSupportMessage {
   id: string;
   role: SupportMessageRole;
   body: string;
-  authorName: string | null;
   createdAt: string;
 }
 
@@ -157,24 +169,36 @@ export interface SupportTicketListQuery extends ListQuery {
 }
 
 /** Support inbox: paged list with a free-text `q` and an optional `status` filter. */
-export function listAdminSupportTickets(query?: SupportTicketListQuery): Promise<ApiList<AdminSupportTicket>> {
+export function listAdminSupportTickets(
+  query?: SupportTicketListQuery,
+): Promise<ApiList<AdminSupportTicket>> {
   return api.list<AdminSupportTicket>("/admin/support-tickets", query);
 }
 
-export function getAdminSupportTicket(id: string): Promise<AdminSupportTicketDetail> {
-  return api.get<AdminSupportTicketDetail>(`/admin/support-tickets/${encodeURIComponent(id)}`, {
-    auth: true,
-  });
+export function getAdminSupportTicket(
+  id: string,
+): Promise<AdminSupportTicketDetail> {
+  return api.get<AdminSupportTicketDetail>(
+    `/admin/support-tickets/${encodeURIComponent(id)}`,
+    {
+      auth: true,
+    },
+  );
 }
 
 /** Opens a ticket on a user's behalf, optionally with their first message. */
 export function createAdminSupportTicket(
   input: CreateSupportTicketInput,
 ): Promise<AdminSupportTicketDetail> {
-  return api.post<AdminSupportTicketDetail>("/admin/support-tickets", input, { auth: true });
+  return api.post<AdminSupportTicketDetail>("/admin/support-tickets", input, {
+    auth: true,
+  });
 }
 
-export function replyAdminSupportTicket(id: string, body: string): Promise<AdminSupportTicketDetail> {
+export function replyAdminSupportTicket(
+  id: string,
+  body: string,
+): Promise<AdminSupportTicketDetail> {
   return api.post<AdminSupportTicketDetail>(
     `/admin/support-tickets/${encodeURIComponent(id)}/messages`,
     { body },
@@ -194,7 +218,10 @@ export function updateAdminSupportTicketStatus(
 }
 
 /** Deactivates the user's 1:1 account + wallet. Idempotent server-side. */
-export function suspendAdminUser(id: string, reason?: string): Promise<AdminUserDetail> {
+export function suspendAdminUser(
+  id: string,
+  reason?: string,
+): Promise<AdminUserDetail> {
   return api.post<AdminUserDetail>(
     `/admin/users/${encodeURIComponent(id)}/suspend`,
     reason ? { reason } : {},
@@ -204,7 +231,11 @@ export function suspendAdminUser(id: string, reason?: string): Promise<AdminUser
 
 /** Reactivates a suspended user's 1:1 account + wallet. Idempotent server-side. */
 export function restoreAdminUser(id: string): Promise<AdminUserDetail> {
-  return api.post<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}/restore`, {}, { auth: true });
+  return api.post<AdminUserDetail>(
+    `/admin/users/${encodeURIComponent(id)}/restore`,
+    {},
+    { auth: true },
+  );
 }
 
 export function getUserNames(ids: string[]): Promise<AdminUserNames> {
@@ -216,14 +247,21 @@ export function getUserNames(ids: string[]): Promise<AdminUserNames> {
   );
 }
 
-export function listAdminTransactions(query?: ListQuery): Promise<ApiList<AdminTransaction>> {
+export function listAdminTransactions(
+  query?: ListQuery,
+): Promise<ApiList<AdminTransaction>> {
   return api.list<AdminTransaction>("/admin/transactions", query);
 }
 
-export function getAdminTransaction(id: string): Promise<AdminTransactionDetail> {
-  return api.get<AdminTransactionDetail>(`/admin/transactions/${encodeURIComponent(id)}`, {
-    auth: true,
-  });
+export function getAdminTransaction(
+  id: string,
+): Promise<AdminTransactionDetail> {
+  return api.get<AdminTransactionDetail>(
+    `/admin/transactions/${encodeURIComponent(id)}`,
+    {
+      auth: true,
+    },
+  );
 }
 
 /** Records an admin approval/decline on an in-flight transaction. */
