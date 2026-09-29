@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
+import { useAuth } from "@/lib/auth/auth-provider";
 import { PageHeader } from "@/components/layout/page-header";
+import { BroadcastCard } from "@/components/settings/broadcast-card";
+import { InviteTeamCard } from "@/components/settings/invite-team-card";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +22,11 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
+  // Invite issuance and broadcasts are ADMIN+ APIs; hide the controls rather
+  // than rendering cards that would 403.
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
   const [notifications, setNotifications] = useState({
     transactionAlerts: true,
     weeklyReport: false,
@@ -40,6 +47,13 @@ export default function SettingsPage() {
         description="Manage notifications, appearance and workspace controls."
       />
 
+      {isAdmin ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <InviteTeamCard />
+          <BroadcastCard />
+        </div>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <Card>
@@ -50,34 +64,32 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-1">
-              {(
-                [
-                  {
-                    key: "transactionAlerts" as const,
-                    title: "Transaction alerts",
-                    description:
-                      "Receive a notification when a high-value or flagged transaction occurs.",
-                  },
-                  {
-                    key: "weeklyReport" as const,
-                    title: "Weekly AI report",
-                    description:
-                      "A summary of AI decisions and model performance every Monday.",
-                  },
-                  {
-                    key: "securityAlerts" as const,
-                    title: "Security alerts",
-                    description:
-                      "Important alerts about your account and the platform.",
-                  },
-                  {
-                    key: "productNews" as const,
-                    title: "Platform news",
-                    description:
-                      "Occasional updates about new features and tips.",
-                  },
-                ]
-              ).map((item, index) => (
+              {[
+                {
+                  key: "transactionAlerts" as const,
+                  title: "Transaction alerts",
+                  description:
+                    "Receive a notification when a high-value or flagged transaction occurs.",
+                },
+                {
+                  key: "weeklyReport" as const,
+                  title: "Weekly AI report",
+                  description:
+                    "A summary of AI decisions and model performance every Monday.",
+                },
+                {
+                  key: "securityAlerts" as const,
+                  title: "Security alerts",
+                  description:
+                    "Important alerts about your account and the platform.",
+                },
+                {
+                  key: "productNews" as const,
+                  title: "Platform news",
+                  description:
+                    "Occasional updates about new features and tips.",
+                },
+              ].map((item, index) => (
                 <div key={item.key}>
                   {index > 0 ? <Separator className="my-1" /> : null}
                   <div className="flex items-center justify-between gap-4 py-2">
@@ -135,19 +147,6 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() =>
-                  toast("Invite sent", {
-                    description: "William Kim was invited to this workspace.",
-                  })
-                }
-              >
-                <Plus />
-                Invite teammate
-              </Button>
               <Button
                 variant="destructive"
                 size="sm"

@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ApiError } from "@/lib/api-client";
@@ -24,6 +24,22 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<MfaChallenge | null>(null);
   const [code, setCode] = useState("");
+  // Set when arriving straight from the invite-acceptance page.
+  const [justInvited, setJustInvited] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Read the query without opting this page into dynamic rendering; the
+    // microtask deferral keeps the render cascade out of the first paint.
+    void (async () => {
+      await Promise.resolve();
+      const invited = new URLSearchParams(window.location.search).get(
+        "invited",
+      );
+      if (!invited) return;
+      setJustInvited(invited);
+      setEmail(invited);
+    })();
+  }, []);
 
   function loginErrorOf(err: unknown): string {
     if (err instanceof ApiError) {
@@ -140,6 +156,11 @@ export default function LoginPage() {
         </form>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {justInvited ? (
+            <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
+              Your account is ready. Sign in with the password you just chose.
+            </p>
+          ) : null}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
