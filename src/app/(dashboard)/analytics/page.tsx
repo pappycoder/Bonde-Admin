@@ -1,12 +1,11 @@
 "use client";
 
-import { TrafficSourcesChart } from "@/components/dashboard/traffic-sources-chart";
+import { MonthlyVolumeChart } from "@/components/dashboard/monthly-volume-chart";
 import { WeeklyTransactionsChart } from "@/components/dashboard/weekly-transactions-chart";
 import { ErrorState, LoadingState } from "@/components/data/state";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { useAdminStats } from "@/lib/api/admin";
-import { trafficSources } from "@/lib/mock-data";
 
 export default function AnalyticsPage() {
   const { data, error, loading, refresh } = useAdminStats();
@@ -29,7 +28,7 @@ export default function AnalyticsPage() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           <WeeklyTransactionsChart data={data.weekly} />
-          <TrafficSourcesChart data={trafficSources} />
+          <MonthlyVolumeChart data={data.revenue} />
         </div>
       )}
     </div>

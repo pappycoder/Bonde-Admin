@@ -2,7 +2,6 @@
 
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import type { WeeklyVolumePoint } from "@/lib/mock-data";
 import {
   Card,
   CardContent,
@@ -16,6 +15,12 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+
+/** One day from `GET /admin/stats` `weekly`. */
+export type WeeklyVolumePoint = {
+  day: string;
+  transactions: number;
+};
 
 const chartConfig = {
   transactions: { label: "Transactions", color: "var(--chart-1)" },

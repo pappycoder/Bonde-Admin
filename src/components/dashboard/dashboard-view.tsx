@@ -9,7 +9,10 @@ import {
 } from "lucide-react";
 
 import { ActivityFeedPanel } from "@/components/dashboard/activity-feed-panel";
-import { OverviewChart } from "@/components/dashboard/overview-chart";
+import {
+  OverviewChart,
+  type RevenuePoint,
+} from "@/components/dashboard/overview-chart";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TransactionsTablePanel } from "@/components/dashboard/transactions-table-panel";
 import { ErrorState, LoadingState } from "@/components/data/state";
@@ -19,7 +22,6 @@ import { Stagger } from "@/components/motion/stagger";
 import { Button } from "@/components/ui/button";
 import { useAdminStats } from "@/lib/api/admin";
 import { formatMoney } from "@/lib/format";
-import type { RevenuePoint } from "@/lib/mock-data";
 
 function pctDelta(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : 100;

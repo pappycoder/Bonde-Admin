@@ -2,7 +2,6 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import type { RevenuePoint } from "@/lib/mock-data";
 import {
   Card,
   CardContent,
@@ -16,6 +15,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+
+/** One month from `GET /admin/stats` — amounts arrive as 2-decimal strings. */
+export type RevenuePoint = {
+  month: string;
+  revenue: number;
+  expenses: number;
+};
 
 const chartConfig = {
   revenue: { label: "Deposits", color: "var(--chart-1)" },
