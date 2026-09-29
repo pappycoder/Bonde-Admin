@@ -47,17 +47,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useApi } from "@/hooks/use-api";
-import type { AdminUserStatus, AdminTxStatus, AdminTxType } from "@/lib/api/admin";
-import { getAdminUser, restoreAdminUser, suspendAdminUser } from "@/lib/api/admin";
+import type {
+  AdminUserStatus,
+  AdminTxStatus,
+  AdminTxType,
+} from "@/lib/api/admin";
+import {
+  getAdminUser,
+  restoreAdminUser,
+  suspendAdminUser,
+} from "@/lib/api/admin";
+import { CreateSupportTicketDialog } from "@/components/dashboard/create-support-ticket-dialog";
 import { ApiError } from "@/lib/api-client";
-import { formatMoney, formatMonthYear, initialsOf, timeAgo } from "@/lib/format";
+import {
+  formatMoney,
+  formatMonthYear,
+  initialsOf,
+  timeAgo,
+} from "@/lib/format";
 
 const STATUS_CLASSES: Record<AdminUserStatus, string> = {
-  active: "border-transparent bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  active:
+    "border-transparent bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   pending:
     "border-transparent bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  suspended:
-    "border-transparent bg-red-500/10 text-red-600 dark:text-red-400",
+  suspended: "border-transparent bg-red-500/10 text-red-600 dark:text-red-400",
 };
 
 const TYPE_LABELS: Record<AdminTxType, string> = {
@@ -178,7 +192,11 @@ export function UserDetailView({ userId }: { userId: string }) {
                 </CardDescription>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <CreateSupportTicketDialog
+                userId={user.id}
+                userName={user.fullName}
+              />
               {user.status === "suspended" ? (
                 <Button
                   variant="outline"
@@ -218,7 +236,9 @@ export function UserDetailView({ userId }: { userId: string }) {
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays className="size-3.5" /> Joined
                 </p>
-                <p className="text-sm font-medium">{formatMonthYear(user.joinedAt)}</p>
+                <p className="text-sm font-medium">
+                  {formatMonthYear(user.joinedAt)}
+                </p>
               </div>
               <div className="space-y-1.5">
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -263,7 +283,9 @@ export function UserDetailView({ userId }: { userId: string }) {
               <span className="text-muted-foreground">
                 {user.phone ?? "—"}{" "}
                 {user.phoneVerified ? (
-                  <span className="ml-1 text-emerald-600 dark:text-emerald-400">· verified</span>
+                  <span className="ml-1 text-emerald-600 dark:text-emerald-400">
+                    · verified
+                  </span>
                 ) : null}
               </span>
             </div>
@@ -288,9 +310,7 @@ export function UserDetailView({ userId }: { userId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Recent transactions</CardTitle>
-          <CardDescription>
-            Latest movement on this account.
-          </CardDescription>
+          <CardDescription>Latest movement on this account.</CardDescription>
         </CardHeader>
         <CardContent>
           {txs.length > 0 ? (
@@ -360,7 +380,10 @@ export function UserDetailView({ userId }: { userId: string }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={acting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction disabled={acting} onClick={() => void handleSuspend()}>
+            <AlertDialogAction
+              disabled={acting}
+              onClick={() => void handleSuspend()}
+            >
               Suspend
             </AlertDialogAction>
           </AlertDialogFooter>

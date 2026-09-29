@@ -35,6 +35,46 @@ const STATUS_FILTERS: { value: "all" | AdminTxStatus; label: string }[] = [
   { value: "failed", label: "Failed" },
 ];
 
+/** Enum values are the raw Prisma ones; the filter layer does not case-fold. */
+const TYPE_FILTERS: { value: string; label: string }[] = [
+  { value: "all", label: "All types" },
+  { value: "DEPOSIT", label: "Deposit" },
+  { value: "WITHDRAWAL", label: "Withdrawal" },
+  { value: "TRANSFER", label: "Transfer" },
+  { value: "PAYMENT", label: "Payment" },
+];
+
+const THRESHOLD_FILTERS: { value: string; label: string }[] = [
+  { value: "all", label: "Any threshold" },
+  { value: "true", label: "Threshold flagged" },
+  { value: "false", label: "Under threshold" },
+];
+
+const RECURRING_FILTERS: { value: string; label: string }[] = [
+  { value: "all", label: "Any schedule" },
+  { value: "true", label: "Recurring" },
+  { value: "false", label: "One-off" },
+];
+
+/** Everything the server accepts via repeatable `?filter=field:value`. */
+type TxFilters = {
+  type: string;
+  thresholdWarning: string;
+  isRecurring: string;
+};
+
+const NO_FILTERS: TxFilters = {
+  type: "all",
+  thresholdWarning: "all",
+  isRecurring: "all",
+};
+
+function filterEntries(filters: TxFilters): string[] {
+  return (Object.keys(filters) as Array<keyof TxFilters>)
+    .filter((key) => filters[key] !== "all")
+    .map((key) => `${key}:${filters[key]}`);
+}
+
 export function TransactionsTablePanel({
   title = "Recent transactions",
   description = "Latest movement across the platform.",
@@ -51,8 +91,20 @@ export function TransactionsTablePanel({
   const [search, setSearch] = useState("");
   const [status, setStatus] =
     useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
+  const [filters, setFilters] = useState<TxFilters>(NO_FILTERS);
   const { data, error, loading, setQuery, setPage, refresh } =
     useList<AdminTransaction>("/admin/transactions", { pageSize });
+
+  const applyFilters = (patch: Partial<TxFilters>) => {
+    const next = { ...filters, ...patch };
+    setFilters(next);
+    const parts = filterEntries(next);
+    setQuery((prev) => ({
+      ...prev,
+      page: 1,
+      filter: parts.length ? parts : undefined,
+    }));
+  };
 
   const applySearch = (value: string) => {
     setSearch(value);
@@ -96,21 +148,70 @@ export function TransactionsTablePanel({
               Search
             </Button>
           </form>
-          <Select
-            value={status}
-            onValueChange={(value) => applyStatus(value as typeof status)}
-          >
-            <SelectTrigger size="sm" className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_FILTERS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              value={status}
+              onValueChange={(value) => applyStatus(value as typeof status)}
+            >
+              <SelectTrigger size="sm" className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_FILTERS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.type}
+              onValueChange={(value) => applyFilters({ type: value })}
+            >
+              <SelectTrigger size="sm" className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TYPE_FILTERS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.thresholdWarning}
+              onValueChange={(value) =>
+                applyFilters({ thresholdWarning: value })
+              }
+            >
+              <SelectTrigger size="sm" className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {THRESHOLD_FILTERS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.isRecurring}
+              onValueChange={(value) => applyFilters({ isRecurring: value })}
+            >
+              <SelectTrigger size="sm" className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RECURRING_FILTERS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       ) : null}
 
