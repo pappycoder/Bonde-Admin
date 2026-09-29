@@ -7,7 +7,13 @@ import { useState } from "react";
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
 import { EmptyState, ErrorState, LoadingState } from "@/components/data/state";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,13 +23,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useList } from "@/hooks/use-list";
-import type { AdminTransaction } from "@/lib/api/admin";
+import type { AdminTransaction, AdminTxStatus } from "@/lib/api/admin";
 
-const STATUS_FILTERS: { value: "all" | "SUCCESS" | "PENDING" | "FAIL"; label: string }[] = [
+/** Same vocabulary the status badges render, so the filter matches the table. */
+const STATUS_FILTERS: { value: "all" | AdminTxStatus; label: string }[] = [
   { value: "all", label: "All statuses" },
-  { value: "SUCCESS", label: "Success" },
-  { value: "PENDING", label: "Pending" },
-  { value: "FAIL", label: "Failed" },
+  { value: "completed", label: "Completed" },
+  { value: "processing", label: "Processing" },
+  { value: "pending", label: "Pending" },
+  { value: "flagged", label: "Flagged" },
+  { value: "failed", label: "Failed" },
 ];
 
 export function TransactionsTablePanel({
@@ -40,11 +49,10 @@ export function TransactionsTablePanel({
   searchable?: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
-  const { data, error, loading, setQuery, setPage, refresh } = useList<AdminTransaction>(
-    "/admin/transactions",
-    { pageSize },
-  );
+  const [status, setStatus] =
+    useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
+  const { data, error, loading, setQuery, setPage, refresh } =
+    useList<AdminTransaction>("/admin/transactions", { pageSize });
 
   const applySearch = (value: string) => {
     setSearch(value);
@@ -56,7 +64,7 @@ export function TransactionsTablePanel({
     setQuery((prev) => ({
       ...prev,
       page: 1,
-      filter: value === "all" ? undefined : [`status:${value}`],
+      uiStatus: value === "all" ? undefined : value,
     }));
   };
 
@@ -88,7 +96,10 @@ export function TransactionsTablePanel({
               Search
             </Button>
           </form>
-          <Select value={status} onValueChange={(value) => applyStatus(value as typeof status)}>
+          <Select
+            value={status}
+            onValueChange={(value) => applyStatus(value as typeof status)}
+          >
             <SelectTrigger size="sm" className="w-40">
               <SelectValue />
             </SelectTrigger>
@@ -107,7 +118,9 @@ export function TransactionsTablePanel({
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div className="space-y-1">
             <CardTitle>{title}</CardTitle>
-            {description ? <CardDescription>{description}</CardDescription> : null}
+            {description ? (
+              <CardDescription>{description}</CardDescription>
+            ) : null}
           </div>
           {showViewAll ? (
             <Button variant="ghost" size="sm" className="gap-1" asChild>
@@ -122,7 +135,10 @@ export function TransactionsTablePanel({
           {loading && !data ? (
             <LoadingState />
           ) : error && !data ? (
-            <ErrorState message={error.message} onRetry={() => void refresh()} />
+            <ErrorState
+              message={error.message}
+              onRetry={() => void refresh()}
+            />
           ) : transactions.length === 0 ? (
             <EmptyState
               title="No transactions found"

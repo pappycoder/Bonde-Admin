@@ -26,6 +26,8 @@ export interface ListQuery {
   filter?: string | string[];
   /** Dedicated status param, used by the admin users and support tickets lists. */
   status?: string;
+  /** Derived transaction status, matching the badge the console renders. */
+  uiStatus?: string;
 }
 
 export interface ApiList<T> {
@@ -43,6 +45,7 @@ export function buildListQuery(query: ListQuery = {}): string {
   if (query.q) params.set("q", query.q);
   if (query.orderBy) params.set("orderBy", query.orderBy);
   if (query.status) params.set("status", query.status);
+  if (query.uiStatus) params.set("uiStatus", query.uiStatus);
   const filters = Array.isArray(query.filter) ? query.filter : [query.filter];
   for (const filter of filters) {
     if (filter) params.append("filter", filter);
@@ -73,7 +76,10 @@ async function apiFetch<T>(
     if (token) finalHeaders.set("authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`/api${path}`, { ...init, headers: finalHeaders });
+  const response = await fetch(`/api${path}`, {
+    ...init,
+    headers: finalHeaders,
+  });
 
   if (response.status === 401 && auth && !retried) {
     if (await tryRefresh()) {
@@ -83,7 +89,10 @@ async function apiFetch<T>(
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, messageOf(response, await jsonOf(response)));
+    throw new ApiError(
+      response.status,
+      messageOf(response, await jsonOf(response)),
+    );
   }
 
   return (await jsonOf(response)) as T;
