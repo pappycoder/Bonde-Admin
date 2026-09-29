@@ -13,10 +13,12 @@ import {
 } from "lucide-react";
 
 import { ActivityFeedPanel } from "@/components/dashboard/activity-feed-panel";
+import { OverviewChart } from "@/components/dashboard/overview-chart";
 import {
-  OverviewChart,
-  type RevenuePoint,
-} from "@/components/dashboard/overview-chart";
+  PeriodSelect,
+  periodLabel,
+  usePeriod,
+} from "@/components/dashboard/period-select";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TransactionsTablePanel } from "@/components/dashboard/transactions-table-panel";
 import { ErrorState, LoadingState } from "@/components/data/state";
@@ -39,24 +41,28 @@ function signedPercent(current: number, previous: number) {
 }
 
 export function DashboardView() {
-  const { data, error, loading, refresh } = useAdminStats();
+  const { days, setDays } = usePeriod();
+  const { data, error, loading, refresh } = useAdminStats(days);
+  const windowed = data?.windowTotals;
+  const period = periodLabel(days);
 
   // The series already in memory are the report; no server round trip needed.
   const exportReport = () => {
     if (!data) return;
     const csv = toCsv(
-      ["Month", "Deposits", "Payouts", "Volume"],
-      data.revenue.map((point) => [
-        point.month,
+      ["Period", "Deposits", "Payouts", "Volume", "Transactions"],
+      data.series.map((point) => [
+        point.label,
         Number(point.revenue),
         Number(point.expenses),
         Number(point.volume),
+        point.transactions,
       ]),
     );
     const stamp = new Date().toISOString().slice(0, 10);
     downloadCsv(`bonde-report-${stamp}.csv`, csv);
     toast.success("Report exported", {
-      description: "The last 12 months of volume, deposits and payouts.",
+      description: `Volume, deposits and payouts for the ${periodLabel(days)}.`,
     });
   };
 
@@ -67,13 +73,16 @@ export function DashboardView() {
           title="Dashboard"
           description="Welcome back — here's what is happening on Bonde today."
         >
-          <Button size="sm" onClick={exportReport} disabled={!data}>
-            Export report
-          </Button>
+          <div className="flex items-center gap-2">
+            <PeriodSelect value={days} onChange={setDays} />
+            <Button size="sm" onClick={exportReport} disabled={!data}>
+              Export report
+            </Button>
+          </div>
         </PageHeader>
       </FadeIn>
 
-      {!data ? (
+      {!data || !windowed ? (
         loading ? (
           <LoadingState className="py-24" />
         ) : (
@@ -85,57 +94,63 @@ export function DashboardView() {
             <StatCard
               title="Active users"
               value={data.totals.activeUsers.toLocaleString()}
-              delta={`+${data.totals.newUsers30d.toLocaleString()}`}
-              trend="up"
-              sublabel={`new in 30 days · ${data.totals.users.toLocaleString()} total`}
+              delta={signedPercent(windowed.newUsers, windowed.newUsersPrev)}
+              trend={windowed.newUsers >= windowed.newUsersPrev ? "up" : "down"}
+              sublabel={`${windowed.newUsers.toLocaleString()} new in the ${period} · ${data.totals.users.toLocaleString()} total`}
               icon={<Users className="size-4" />}
             />
             <StatCard
-              title="Transaction volume (30d)"
-              value={formatMoney(data.totals.volume30d)}
+              title={`Transaction volume (${period})`}
+              value={formatMoney(windowed.volume)}
               delta={signedPercent(
-                Number(data.totals.volume30d),
-                Number(data.totals.volumePrev30d),
+                Number(windowed.volume),
+                Number(windowed.volumePrev),
               )}
-              trend={pctDelta(
-                Number(data.totals.volume30d),
-                Number(data.totals.volumePrev30d),
-              ) >= 0 ? "up" : "down"}
-              sublabel="vs previous 30 days"
+              trend={
+                pctDelta(
+                  Number(windowed.volume),
+                  Number(windowed.volumePrev),
+                ) >= 0
+                  ? "up"
+                  : "down"
+              }
+              sublabel={`vs previous ${period.replace("last ", "")}`}
               icon={<CircleDollarSign className="size-4" />}
             />
             <StatCard
-              title="Deposits (30d)"
-              value={formatMoney(data.totals.deposits30d)}
+              title={`Deposits (${period})`}
+              value={formatMoney(windowed.deposits)}
               delta={signedPercent(
-                Number(data.totals.deposits30d),
-                Number(data.totals.depositsPrev30d),
+                Number(windowed.deposits),
+                Number(windowed.depositsPrev),
               )}
-              trend={pctDelta(
-                Number(data.totals.deposits30d),
-                Number(data.totals.depositsPrev30d),
-              ) >= 0 ? "up" : "down"}
-              sublabel="vs previous 30 days"
+              trend={
+                pctDelta(
+                  Number(windowed.deposits),
+                  Number(windowed.depositsPrev),
+                ) >= 0
+                  ? "up"
+                  : "down"
+              }
+              sublabel={`vs previous ${period.replace("last ", "")}`}
               icon={<Landmark className="size-4" />}
             />
             <StatCard
-              title="New users (30d)"
-              value={data.totals.newUsers30d.toLocaleString()}
-              delta={signedPercent(
-                data.totals.newUsers30d,
-                data.totals.newUsersPrev30d,
-              )}
-              trend={pctDelta(
-                data.totals.newUsers30d,
-                data.totals.newUsersPrev30d,
-              ) >= 0 ? "up" : "down"}
-              sublabel="vs previous 30 days"
+              title={`New users (${period})`}
+              value={windowed.newUsers.toLocaleString()}
+              delta={signedPercent(windowed.newUsers, windowed.newUsersPrev)}
+              trend={
+                pctDelta(windowed.newUsers, windowed.newUsersPrev) >= 0
+                  ? "up"
+                  : "down"
+              }
+              sublabel={`vs previous ${period.replace("last ", "")}`}
               icon={<UserPlus className="size-4" />}
             />
             <StatCard
-              title="Transactions (30d)"
-              value={data.totals.transactions30d.toLocaleString()}
-              sublabel={`${data.weekly.at(-1)?.transactions ?? 0} today`}
+              title={`Transactions (${period})`}
+              value={windowed.transactions.toLocaleString()}
+              sublabel={`${data.series.at(-1)?.transactions ?? 0} in the last day`}
               icon={<ArrowLeftRight className="size-4" />}
             />
             <StatCard
@@ -153,7 +168,15 @@ export function DashboardView() {
           </Stagger>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <OverviewChart data={toRevenuePoints(data)} className="lg:col-span-2" />
+            <OverviewChart
+              data={data.series.map((point) => ({
+                label: point.label,
+                revenue: Number(point.revenue),
+                expenses: Number(point.expenses),
+              }))}
+              description={`Deposits vs. payouts for the ${period}`}
+              className="lg:col-span-2"
+            />
             <ActivityFeedPanel />
           </div>
         </>
@@ -162,14 +185,4 @@ export function DashboardView() {
       <TransactionsTablePanel pageSize={8} showViewAll />
     </div>
   );
-}
-
-function toRevenuePoints(stats: {
-  revenue: Array<{ month: string; revenue: string; expenses: string }>;
-}): RevenuePoint[] {
-  return stats.revenue.map((point) => ({
-    month: point.month,
-    revenue: Number(point.revenue),
-    expenses: Number(point.expenses),
-  }));
 }

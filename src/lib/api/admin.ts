@@ -81,45 +81,55 @@ export type AdminUserNames = Record<string, string>;
 
 export type AdminReviewStatus = "APPROVED" | "DECLINED";
 
+export interface AdminStatsSeriesPoint {
+  /** Day label ("Sep 12") for short windows, month + year ("Sep 26") for long. */
+  label: string;
+  revenue: string;
+  expenses: string;
+  volume: string;
+  transactions: number;
+}
+
 export interface AdminStats {
+  /** The trailing window the period metrics were scoped to, echoed by the API. */
+  window: { days: number; from: string; to: string };
+  /** State gauges — all-time by nature, never windowed. */
   totals: {
     users: number;
     activeUsers: number;
     pendingUsers: number;
     suspendedUsers: number;
-    newUsers30d: number;
-    newUsersPrev30d: number;
-    transactions30d: number;
-    volume: string;
-    volume30d: string;
-    volumePrev30d: string;
-    deposits30d: string;
-    depositsPrev30d: string;
     pendingReviews: number;
     openTickets: number;
-  };
-  /** Last 12 month buckets, oldest first. Amounts are fixed 2-decimal strings. */
-  revenue: Array<{
-    month: string;
-    revenue: string;
-    expenses: string;
     volume: string;
-  }>;
-  /** Last 7 calendar days, oldest first. */
-  weekly: Array<{ day: string; transactions: number }>;
+  };
+  /** Period metrics over `window`, with the prior period for the deltas. */
+  windowTotals: {
+    newUsers: number;
+    newUsersPrev: number;
+    transactions: number;
+    volume: string;
+    volumePrev: string;
+    deposits: string;
+    depositsPrev: string;
+  };
+  /** One series over `window`, oldest first. */
+  series: AdminStatsSeriesPoint[];
 }
 
 export function listAdminUsers(query?: ListQuery): Promise<ApiList<AdminUser>> {
   return api.list<AdminUser>("/admin/users", query);
 }
 
-export function getAdminStats(): Promise<AdminStats> {
-  return api.get<AdminStats>("/admin/stats", { auth: true });
+export function getAdminStats(days?: number): Promise<AdminStats> {
+  const query = days ? `?days=${days}` : "";
+  return api.get<AdminStats>(`/admin/stats${query}`, { auth: true });
 }
 
 const STATS_TTL_MS = 30_000;
-let statsCache: { at: number; data: AdminStats } | null = null;
-let statsInFlight: Promise<AdminStats> | null = null;
+const DEFAULT_STATS_DAYS = 30;
+const statsCache = new Map<string, { at: number; data: AdminStats }>();
+const statsInFlight = new Map<string, Promise<AdminStats>>();
 
 /**
  * The sidebar badge and the page body both need stats, and stats is the
@@ -127,29 +137,39 @@ let statsInFlight: Promise<AdminStats> | null = null;
  * calls inside the TTL reuse it. Failures are never cached, so the error-state
  * retry still reaches the server.
  */
-function fetchAdminStatsShared(): Promise<AdminStats> {
-  if (statsCache && Date.now() - statsCache.at < STATS_TTL_MS) {
-    return Promise.resolve(statsCache.data);
+function fetchAdminStatsShared(days: number | undefined): Promise<AdminStats> {
+  // Normalised so a caller passing no window and one passing the default
+  // share a cache entry — the sidebar badge and the dashboard would otherwise
+  // each fire their own identical request.
+  const key = String(days ?? DEFAULT_STATS_DAYS);
+  const cached = statsCache.get(key);
+  if (cached && Date.now() - cached.at < STATS_TTL_MS) {
+    return Promise.resolve(cached.data);
   }
-  if (statsInFlight) return statsInFlight;
+  const existing = statsInFlight.get(key);
+  if (existing) return existing;
 
-  statsInFlight = getAdminStats().then(
+  const request = getAdminStats(days ?? DEFAULT_STATS_DAYS).then(
     (data) => {
-      statsCache = { at: Date.now(), data };
-      statsInFlight = null;
+      statsCache.set(key, { at: Date.now(), data });
+      statsInFlight.delete(key);
       return data;
     },
     (error) => {
-      statsInFlight = null;
+      statsInFlight.delete(key);
       throw error;
     },
   );
-  return statsInFlight;
+  statsInFlight.set(key, request);
+  return request;
 }
 
-/** Dashboard/analytics KPIs: totals, monthly series and 7-day volume. */
-export function useAdminStats() {
-  return useApi<AdminStats>(fetchAdminStatsShared, []);
+/**
+ * Dashboard/analytics KPIs for one trailing window. The sidebar badge asks for
+ * the default window so it can keep showing without a period picker.
+ */
+export function useAdminStats(days?: number) {
+  return useApi<AdminStats>(() => fetchAdminStatsShared(days), [days]);
 }
 
 export function getAdminUser(id: string): Promise<AdminUserDetail> {

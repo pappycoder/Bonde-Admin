@@ -21,31 +21,33 @@ const chartConfig = {
   volume: { label: "Volume", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
-/** One month from `GET /admin/stats` — amounts arrive as 2-decimal strings. */
-export type MonthlyVolumePoint = {
-  month: string;
+/** One bucket of the admin series — amounts arrive as 2-decimal strings. */
+export type VolumePoint = {
+  label: string;
   volume: string;
 };
 
-export function MonthlyVolumeChart({
+export function VolumeChart({
   data,
+  title,
+  description,
   className,
 }: {
-  data: MonthlyVolumePoint[];
+  data: VolumePoint[];
+  title: string;
+  description: string;
   className?: string;
 }) {
   const points = data.map((point) => ({
-    month: point.month,
+    label: point.label,
     volume: Number(point.volume),
   }));
 
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Volume this year</CardTitle>
-        <CardDescription>
-          All successful transactions for the past 12 months
-        </CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -55,7 +57,7 @@ export function MonthlyVolumeChart({
           <AreaChart data={points} margin={{ left: 12, right: 12 }}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="label"
               tickLine={false}
               axisLine={false}
               tickMargin={8}

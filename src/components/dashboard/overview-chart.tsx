@@ -16,9 +16,9 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
-/** One month from `GET /admin/stats` — amounts arrive as 2-decimal strings. */
+/** One bucket of the admin series, with amounts already coerced to numbers. */
 export type RevenuePoint = {
-  month: string;
+  label: string;
   revenue: number;
   expenses: number;
 };
@@ -30,18 +30,18 @@ const chartConfig = {
 
 export function OverviewChart({
   data,
+  description,
   className,
 }: {
   data: RevenuePoint[];
+  description: string;
   className?: string;
 }) {
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>Transaction volume</CardTitle>
-        <CardDescription>
-          Deposits vs. payouts for the past 12 months
-        </CardDescription>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -51,7 +51,7 @@ export function OverviewChart({
           <AreaChart data={data} margin={{ left: 12, right: 12 }}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="label"
               tickLine={false}
               axisLine={false}
               tickMargin={8}

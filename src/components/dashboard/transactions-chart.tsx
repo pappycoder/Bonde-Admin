@@ -16,9 +16,9 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
-/** One day from `GET /admin/stats` `weekly`. */
-export type WeeklyVolumePoint = {
-  day: string;
+/** One bucket of the admin series — a day, or a month for long windows. */
+export type TransactionsPoint = {
+  label: string;
   transactions: number;
 };
 
@@ -26,18 +26,22 @@ const chartConfig = {
   transactions: { label: "Transactions", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
-export function WeeklyTransactionsChart({
+export function TransactionsChart({
   data,
+  title,
+  description,
   className,
 }: {
-  data: WeeklyVolumePoint[];
+  data: TransactionsPoint[];
+  title: string;
+  description: string;
   className?: string;
 }) {
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Transactions this week</CardTitle>
-        <CardDescription>Transactions processed per day</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -47,7 +51,7 @@ export function WeeklyTransactionsChart({
           <BarChart data={data} margin={{ left: 12, right: 12 }}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="day"
+              dataKey="label"
               tickLine={false}
               axisLine={false}
               tickMargin={8}

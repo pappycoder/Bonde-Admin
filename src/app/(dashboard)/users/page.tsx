@@ -2,6 +2,11 @@
 
 import { ShieldCheck, UserCheck, UserX, Users } from "lucide-react";
 
+import {
+  PeriodSelect,
+  periodLabel,
+  usePeriod,
+} from "@/components/dashboard/period-select";
 import { UsersTablePanel } from "@/components/dashboard/users-table-panel";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ErrorState, LoadingState } from "@/components/data/state";
@@ -17,8 +22,10 @@ function signedPercent(current: number, previous: number) {
 }
 
 export default function UsersPage() {
-  const { data, error, loading, refresh } = useAdminStats();
+  const { days, setDays } = usePeriod();
+  const { data, error, loading, refresh } = useAdminStats(days);
   const totals = data?.totals;
+  const windowed = data?.windowTotals;
 
   return (
     <div className="flex flex-col gap-6">
@@ -26,10 +33,12 @@ export default function UsersPage() {
         <PageHeader
           title="Users"
           description="Monitor every user on the Bonde platform."
-        />
+        >
+          <PeriodSelect value={days} onChange={setDays} />
+        </PageHeader>
       </FadeIn>
 
-      {!totals ? (
+      {!totals || !windowed ? (
         loading ? (
           <LoadingState className="py-16" />
         ) : (
@@ -40,9 +49,9 @@ export default function UsersPage() {
           <StatCard
             title="Total users"
             value={totals.users.toLocaleString()}
-            delta={signedPercent(totals.newUsers30d, totals.newUsersPrev30d)}
-            trend={totals.newUsers30d >= totals.newUsersPrev30d ? "up" : "down"}
-            sublabel={`${totals.newUsers30d.toLocaleString()} new in 30 days`}
+            delta={signedPercent(windowed.newUsers, windowed.newUsersPrev)}
+            trend={windowed.newUsers >= windowed.newUsersPrev ? "up" : "down"}
+            sublabel={`${windowed.newUsers.toLocaleString()} new in the ${periodLabel(days)}`}
             icon={<Users className="size-4" />}
           />
           <StatCard
