@@ -14,32 +14,45 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useApi } from "@/hooks/use-api";
 import {
+  countUnreadNotifications,
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
-  type AppNotification,
 } from "@/lib/api/notifications";
 import { timeAgo } from "@/lib/format";
 
-function unreadCount(items: AppNotification[]): number {
-  return items.reduce((count, item) => (item.status === "UNREAD" ? count + 1 : count), 0);
-}
+const PAGE_SIZE = 20;
 
 export function NotificationsMenu() {
   const [open, setOpen] = useState(false);
-  const { data, error, loading, refresh } = useApi(
-    () => listNotifications({ pageSize: 50 }),
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const { data, error, loading, refresh } = useApi(() => {
+    const query: Parameters<typeof listNotifications>[0] = {
+      pageSize: PAGE_SIZE,
+      page,
+    };
+    if (unreadOnly) query.filter = "status:UNREAD";
+    return listNotifications(query);
+  }, [page, unreadOnly]);
+  const { data: unreadTotal, refresh: refreshUnread } = useApi(
+    countUnreadNotifications,
     [],
   );
 
   const items = data?.items ?? [];
-  const unread = unreadCount(items);
+  const unread = unreadTotal ?? 0;
   const badge = unread > 99 ? "99+" : String(unread);
+  const totalPages = data?.totalPages ?? 1;
+
+  const reload = async () => {
+    await Promise.all([refresh(), refreshUnread()]);
+  };
 
   const handleMarkRead = async (id: string) => {
     try {
       await markNotificationRead(id);
-      await refresh();
+      await reload();
     } catch {
       toast.error("Could not mark notification as read");
     }
@@ -48,7 +61,8 @@ export function NotificationsMenu() {
   const handleMarkAllRead = async () => {
     try {
       await markAllNotificationsRead();
-      await refresh();
+      setPage(1);
+      await reload();
     } catch {
       toast.error("Could not update notifications");
     }
@@ -71,26 +85,44 @@ export function NotificationsMenu() {
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[min(calc(100vw-2rem),22rem)] p-0">
-        <div className="flex items-center justify-between border-b px-4 py-3">
+      <DropdownMenuContent
+        align="end"
+        className="w-[min(calc(100vw-2rem),22rem)] p-0"
+      >
+        <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
           <p className="text-sm font-medium">Notifications</p>
-          {unread > 0 ? (
+          <div className="flex items-center gap-1">
             <Button
-              variant="ghost"
+              variant={unreadOnly ? "secondary" : "ghost"}
               size="sm"
-              className="h-7 gap-1 px-2 text-xs text-muted-foreground"
-              onClick={handleMarkAllRead}
+              className="h-7 gap-1 px-2 text-xs"
+              onClick={() => {
+                setUnreadOnly((value) => !value);
+                setPage(1);
+              }}
             >
-              <CheckCheck className="size-3.5" />
-              Mark all read
+              Unread
             </Button>
-          ) : null}
+            {unread > 0 ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+                onClick={handleMarkAllRead}
+              >
+                <CheckCheck className="size-3.5" />
+                Mark all read
+              </Button>
+            ) : null}
+          </div>
         </div>
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
             <div className="flex flex-col items-center gap-3 py-10">
               <div className="size-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
-              <p className="text-sm text-muted-foreground">Loading notifications…</p>
+              <p className="text-sm text-muted-foreground">
+                Loading notifications…
+              </p>
             </div>
           ) : error ? (
             <div className="p-4">
@@ -98,7 +130,11 @@ export function NotificationsMenu() {
                 title="Could not load notifications"
                 description={error.message}
                 action={
-                  <Button variant="outline" size="sm" onClick={() => void refresh()}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void refresh()}
+                  >
                     Retry
                   </Button>
                 }
@@ -118,7 +154,8 @@ export function NotificationsMenu() {
                   <button
                     type="button"
                     onClick={() => {
-                      if (item.status === "UNREAD") void handleMarkRead(item.id);
+                      if (item.status === "UNREAD")
+                        void handleMarkRead(item.id);
                     }}
                     className={cn(
                       "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50",
@@ -137,7 +174,9 @@ export function NotificationsMenu() {
                     </span>
                     <span className="min-w-0 flex-1 space-y-0.5">
                       <span className="flex items-baseline justify-between gap-2">
-                        <span className="truncate text-sm font-medium">{item.title}</span>
+                        <span className="truncate text-sm font-medium">
+                          {item.title}
+                        </span>
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {timeAgo(item.createdAt)}
                         </span>
@@ -152,6 +191,33 @@ export function NotificationsMenu() {
             </ul>
           )}
         </div>
+        {totalPages > 1 ? (
+          <div className="flex items-center justify-between border-t px-4 py-2">
+            <p className="text-xs text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                disabled={page >= totalPages || loading}
+                onClick={() => setPage((value) => value + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

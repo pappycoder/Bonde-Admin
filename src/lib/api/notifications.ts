@@ -15,14 +15,38 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export function listNotifications(query?: ListQuery): Promise<ApiList<AppNotification>> {
+export function listNotifications(
+  query?: ListQuery,
+): Promise<ApiList<AppNotification>> {
   return api.list<AppNotification>("/notifications", query);
 }
 
-export async function markNotificationRead(id: string): Promise<AppNotification> {
-  return api.patch<AppNotification>(`/notifications/${id}/read`);
+export async function markNotificationRead(
+  id: string,
+): Promise<AppNotification> {
+  return api.patch<AppNotification>(
+    `/notifications/${id}/read`,
+    {},
+    { auth: true },
+  );
 }
 
 export async function markAllNotificationsRead(): Promise<{ updated: number }> {
-  return api.patch<{ updated: number }>("/notifications/read-all");
+  return api.patch<{ updated: number }>(
+    "/notifications/read-all",
+    {},
+    { auth: true },
+  );
+}
+
+/**
+ * Total unread count, straight from the list envelope. Counting the fetched
+ * page instead under-reports once unread exceeds one page.
+ */
+export async function countUnreadNotifications(): Promise<number> {
+  const page = await api.list<AppNotification>("/notifications", {
+    pageSize: 1,
+    filter: "status:UNREAD",
+  });
+  return page.total;
 }
