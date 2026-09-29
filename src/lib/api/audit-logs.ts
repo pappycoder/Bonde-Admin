@@ -24,7 +24,6 @@ export interface ActivityItem {
   tone?: "primary" | "success" | "warning" | "muted";
   device?: string;
   ip?: string;
-  status?: string;
   createdAt: number;
 }
 
@@ -48,14 +47,6 @@ function toneOf(action: string): NonNullable<ActivityItem["tone"]> {
   if (PRIMARY_ACTIONS.some((key) => action.includes(key))) return "primary";
   if (WARNING_ACTIONS.some((key) => action.includes(key))) return "warning";
   return "muted";
-}
-
-function statusOf(action: string): string {
-  if (action.includes("denied") || action.includes("fail")) return "denied";
-  if (action.includes("suspend") || action.includes("flag")) return "flagged";
-  if (action.includes("withdraw")) return "processing";
-  if (action.includes("approve")) return "approved";
-  return "processing";
 }
 
 function humanizeAction(action: string): string {
@@ -126,7 +117,6 @@ export function toActivityItems(
       tone: toneOf(log.action),
       device: log.userAgent ? parseDevice(log.userAgent) : undefined,
       ip: log.ipAddress ?? undefined,
-      status: statusOf(log.action),
       createdAt: Date.parse(log.createdAt),
     };
   });

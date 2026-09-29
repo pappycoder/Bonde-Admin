@@ -117,9 +117,39 @@ export function getAdminStats(): Promise<AdminStats> {
   return api.get<AdminStats>("/admin/stats", { auth: true });
 }
 
+const STATS_TTL_MS = 30_000;
+let statsCache: { at: number; data: AdminStats } | null = null;
+let statsInFlight: Promise<AdminStats> | null = null;
+
+/**
+ * The sidebar badge and the page body both need stats, and stats is the
+ * heaviest admin aggregate. Concurrent callers share one request and repeat
+ * calls inside the TTL reuse it. Failures are never cached, so the error-state
+ * retry still reaches the server.
+ */
+function fetchAdminStatsShared(): Promise<AdminStats> {
+  if (statsCache && Date.now() - statsCache.at < STATS_TTL_MS) {
+    return Promise.resolve(statsCache.data);
+  }
+  if (statsInFlight) return statsInFlight;
+
+  statsInFlight = getAdminStats().then(
+    (data) => {
+      statsCache = { at: Date.now(), data };
+      statsInFlight = null;
+      return data;
+    },
+    (error) => {
+      statsInFlight = null;
+      throw error;
+    },
+  );
+  return statsInFlight;
+}
+
 /** Dashboard/analytics KPIs: totals, monthly series and 7-day volume. */
 export function useAdminStats() {
-  return useApi<AdminStats>(getAdminStats, []);
+  return useApi<AdminStats>(fetchAdminStatsShared, []);
 }
 
 export function getAdminUser(id: string): Promise<AdminUserDetail> {

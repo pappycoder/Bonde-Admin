@@ -129,6 +129,13 @@ export function TwoFactorCard() {
     toast.success("Recovery codes copied");
   };
 
+  const copySecret = async () => {
+    if (!setup?.secret) return;
+    await navigator.clipboard.writeText(setup.secret);
+    setCopied(true);
+    toast.success("Setup key copied");
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -290,12 +297,23 @@ export function TwoFactorCard() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="two-factor-secret">Setup key</Label>
-                <Input
-                  id="two-factor-secret"
-                  readOnly
-                  value={setup?.secret ?? ""}
-                  className="font-mono text-xs"
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="two-factor-secret"
+                    readOnly
+                    value={setup?.secret ?? ""}
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void copySecret()}
+                    aria-label="Copy setup key"
+                  >
+                    <Copy className="size-3.5" />
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Enter this key manually if you cannot scan the code.
                 </p>

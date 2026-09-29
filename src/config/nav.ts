@@ -13,7 +13,11 @@ export type NavItem = {
   title: string;
   href: string;
   icon: LucideIcon;
-  badge?: number;
+  /**
+   * Resolved at render time from `GET /admin/stats` rather than hardcoded, so
+   * the count cannot drift from the real queue depth.
+   */
+  badgeKey?: "openTickets" | "pendingReviews";
 };
 
 export type NavGroup = {
@@ -39,7 +43,12 @@ export const navGroups: NavGroup[] = [
         icon: ArrowLeftRight,
       },
       { title: "Activities", href: "/activities", icon: ListChecks },
-      { title: "Support", href: "/support", icon: LifeBuoy, badge: 6 },
+      {
+        title: "Support",
+        href: "/support",
+        icon: LifeBuoy,
+        badgeKey: "openTickets",
+      },
     ],
   },
   {

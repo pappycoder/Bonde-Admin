@@ -4,13 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronUp, CreditCard, LogOut, UserRound } from "lucide-react";
+import { ChevronUp, LogOut, UserRound } from "lucide-react";
 
 import { LogoutDialog } from "@/components/auth/logout-dialog";
-import { navGroups } from "@/config/nav";
+import { navGroups, type NavItem } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAdminStats } from "@/lib/api/admin";
 import { useAuth } from "@/lib/auth/auth-provider";
 import {
   DropdownMenu,
@@ -35,6 +36,12 @@ import {
 } from "@/components/ui/sidebar";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  const { data: stats } = useAdminStats();
+  const badgeFor = (item: NavItem): number | null => {
+    if (!item.badgeKey) return null;
+    const value = stats?.totals[item.badgeKey];
+    return value ? value : null;
+  };
   const pathname = usePathname();
   const { user } = useAuth();
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -91,12 +98,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                         <Link href={item.href}>
                           <item.icon />
                           <span>{item.title}</span>
-                          {item.badge ? (
+                          {badgeFor(item) ? (
                             <Badge
                               variant="secondary"
                               className="ml-auto rounded-full px-1.5 text-[10px] tabular-nums"
                             >
-                              {item.badge}
+                              {badgeFor(item)}
                             </Badge>
                           ) : null}
                         </Link>
@@ -125,9 +132,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">
-                      {name}
-                    </span>
+                    <span className="truncate font-medium">{name}</span>
                     <span className="truncate text-xs text-muted-foreground">
                       {email}
                     </span>
@@ -148,9 +153,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {name}
-                      </span>
+                      <span className="truncate font-semibold">{name}</span>
                       <span className="truncate text-xs text-muted-foreground">
                         {email}
                       </span>
@@ -164,12 +167,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                     Profile
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <CreditCard />
-                  Billing
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => setLogoutOpen(true)}>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setLogoutOpen(true)}
+                >
                   <LogOut />
                   Sign out
                 </DropdownMenuItem>

@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import {
   CircleDollarSign,
   Landmark,
@@ -21,6 +23,7 @@ import { FadeIn } from "@/components/motion/fade-in";
 import { Stagger } from "@/components/motion/stagger";
 import { Button } from "@/components/ui/button";
 import { useAdminStats } from "@/lib/api/admin";
+import { downloadCsv, toCsv } from "@/lib/csv";
 import { formatMoney } from "@/lib/format";
 
 function pctDelta(current: number, previous: number) {
@@ -36,6 +39,25 @@ function signedPercent(current: number, previous: number) {
 export function DashboardView() {
   const { data, error, loading, refresh } = useAdminStats();
 
+  // The series already in memory are the report; no server round trip needed.
+  const exportReport = () => {
+    if (!data) return;
+    const csv = toCsv(
+      ["Month", "Deposits", "Payouts", "Volume"],
+      data.revenue.map((point) => [
+        point.month,
+        Number(point.revenue),
+        Number(point.expenses),
+        Number(point.volume),
+      ]),
+    );
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv(`bonde-report-${stamp}.csv`, csv);
+    toast.success("Report exported", {
+      description: "The last 12 months of volume, deposits and payouts.",
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <FadeIn>
@@ -43,7 +65,9 @@ export function DashboardView() {
           title="Dashboard"
           description="Welcome back — here's what is happening on Bonde today."
         >
-          <Button size="sm">Export report</Button>
+          <Button size="sm" onClick={exportReport} disabled={!data}>
+            Export report
+          </Button>
         </PageHeader>
       </FadeIn>
 

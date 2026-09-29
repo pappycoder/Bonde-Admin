@@ -47,7 +47,7 @@ export function UsersTable({ users }: { users: AdminUser[] }) {
           <TableHead>User</TableHead>
           <TableHead className="hidden md:table-cell">Balance</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="hidden lg:table-cell">Last active</TableHead>
+          <TableHead className="hidden lg:table-cell">Last updated</TableHead>
           <TableHead className="w-16" aria-label="Actions" />
         </TableRow>
       </TableHeader>

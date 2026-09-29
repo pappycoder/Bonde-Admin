@@ -1,11 +1,9 @@
 "use client";
 
-import { cn } from "cn";
 import { motion } from "motion/react";
 
 import type { ActivityItem } from "@/lib/api/audit-logs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -21,20 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const STATUS_CLASSES: Record<string, string> = {
-  approved:
-    "border-transparent bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  processing:
-    "border-transparent bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  pending:
-    "border-transparent bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  flagged:
-    "border-transparent bg-orange-500/10 text-orange-600 dark:text-orange-400",
-  denied:
-    "border-transparent bg-red-500/10 text-red-600 dark:text-red-400",
-  open: "border-transparent bg-red-500/10 text-red-600 dark:text-red-400",
-};
 
 export function ActivityLog({
   activities,
@@ -60,7 +44,6 @@ export function ActivityLog({
               <TableHead className="hidden md:table-cell">Device</TableHead>
               <TableHead className="hidden lg:table-cell">IP address</TableHead>
               <TableHead className="hidden sm:table-cell">Time</TableHead>
-              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,17 +88,6 @@ export function ActivityLog({
                 </TableCell>
                 <TableCell className="hidden whitespace-nowrap text-muted-foreground sm:table-cell">
                   {activity.time}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "border-transparent capitalize",
-                      STATUS_CLASSES[activity.status ?? "pending"],
-                    )}
-                  >
-                    {activity.status ?? "pending"}
-                  </Badge>
                 </TableCell>
               </motion.tr>
             ))}
