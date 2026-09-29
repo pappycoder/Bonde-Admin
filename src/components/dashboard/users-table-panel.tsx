@@ -6,7 +6,13 @@ import { useState } from "react";
 import { UsersTable } from "@/components/dashboard/users-table";
 import { EmptyState, ErrorState, LoadingState } from "@/components/data/state";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,6 +31,20 @@ const STATUS_OPTIONS: { value: AdminUserStatus | "all"; label: string }[] = [
   { value: "suspended", label: "Suspended" },
 ];
 
+type VerifiedFilter = "all" | "true" | "false";
+
+const EMAIL_OPTIONS: { value: VerifiedFilter; label: string }[] = [
+  { value: "all", label: "Any email" },
+  { value: "true", label: "Email verified" },
+  { value: "false", label: "Email unverified" },
+];
+
+const PHONE_OPTIONS: { value: VerifiedFilter; label: string }[] = [
+  { value: "all", label: "Any phone" },
+  { value: "true", label: "Phone verified" },
+  { value: "false", label: "Phone unverified" },
+];
+
 export function UsersTablePanel({
   title = "All users",
   description = "Monitor who is active across the platform.",
@@ -34,10 +54,10 @@ export function UsersTablePanel({
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<AdminUserStatus | "all">("all");
-  const { data, error, loading, setQuery, setPage, refresh } = useList<AdminUser>(
-    "/admin/users",
-    { pageSize: 20 },
-  );
+  const [emailVerified, setEmailVerified] = useState<VerifiedFilter>("all");
+  const [phoneVerified, setPhoneVerified] = useState<VerifiedFilter>("all");
+  const { data, error, loading, setQuery, setPage, refresh } =
+    useList<AdminUser>("/admin/users", { pageSize: 20 });
 
   const applySearch = (value: string) => {
     setSearch(value);
@@ -46,7 +66,31 @@ export function UsersTablePanel({
 
   const applyStatus = (value: AdminUserStatus | "all") => {
     setStatus(value);
-    setQuery((prev) => ({ ...prev, page: 1, status: value === "all" ? undefined : value }));
+    setQuery((prev) => ({
+      ...prev,
+      page: 1,
+      status: value === "all" ? undefined : value,
+    }));
+  };
+
+  // The API takes repeatable `?filter=field:value`; only active ones are sent.
+  const applyVerified = (
+    field: "emailVerified" | "phoneVerified",
+    value: VerifiedFilter,
+  ) => {
+    const next = { emailVerified, phoneVerified, [field]: value };
+    if (field === "emailVerified") setEmailVerified(value);
+    else setPhoneVerified(value);
+
+    const parts = (Object.keys(next) as Array<keyof typeof next>)
+      .filter((key) => next[key] !== "all")
+      .map((key) => `${key}:${next[key]}`);
+
+    setQuery((prev) => ({
+      ...prev,
+      page: 1,
+      filter: parts.length ? parts : undefined,
+    }));
   };
 
   const users = data?.items ?? [];
@@ -76,37 +120,83 @@ export function UsersTablePanel({
             Search
           </Button>
         </form>
-        <Select value={status} onValueChange={(value) => applyStatus(value as AdminUserStatus | "all")}>
-          <SelectTrigger size="sm" className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={status}
+            onValueChange={(value) =>
+              applyStatus(value as AdminUserStatus | "all")
+            }
+          >
+            <SelectTrigger size="sm" className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={emailVerified}
+            onValueChange={(value) =>
+              applyVerified("emailVerified", value as VerifiedFilter)
+            }
+          >
+            <SelectTrigger size="sm" className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {EMAIL_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={phoneVerified}
+            onValueChange={(value) =>
+              applyVerified("phoneVerified", value as VerifiedFilter)
+            }
+          >
+            <SelectTrigger size="sm" className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PHONE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
+          {description ? (
+            <CardDescription>{description}</CardDescription>
+          ) : null}
         </CardHeader>
         <CardContent>
           {loading && !data ? (
             <LoadingState />
           ) : error && !data ? (
-            <ErrorState message={error.message} onRetry={() => void refresh()} />
+            <ErrorState
+              message={error.message}
+              onRetry={() => void refresh()}
+            />
           ) : users.length === 0 ? (
             <EmptyState
               title="No users found"
               description="Try a different search or status filter."
             />
           ) : (
-            <UsersTable users={users} />
+            <UsersTable users={users} onChanged={() => void refresh()} />
           )}
         </CardContent>
       </Card>

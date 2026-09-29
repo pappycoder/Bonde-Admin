@@ -3,7 +3,9 @@
 import { toast } from "sonner";
 
 import {
+  ArrowLeftRight,
   CircleDollarSign,
+  ClipboardCheck,
   Landmark,
   MessagesSquare,
   UserPlus,
@@ -79,7 +81,7 @@ export function DashboardView() {
         )
       ) : (
         <>
-          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               title="Active users"
               value={data.totals.activeUsers.toLocaleString()}
@@ -129,6 +131,18 @@ export function DashboardView() {
               ) >= 0 ? "up" : "down"}
               sublabel="vs previous 30 days"
               icon={<UserPlus className="size-4" />}
+            />
+            <StatCard
+              title="Transactions (30d)"
+              value={data.totals.transactions30d.toLocaleString()}
+              sublabel={`${data.weekly.at(-1)?.transactions ?? 0} today`}
+              icon={<ArrowLeftRight className="size-4" />}
+            />
+            <StatCard
+              title="Pending reviews"
+              value={data.totals.pendingReviews.toLocaleString()}
+              sublabel="awaiting approval"
+              icon={<ClipboardCheck className="size-4" />}
             />
             <StatCard
               title="Open tickets"

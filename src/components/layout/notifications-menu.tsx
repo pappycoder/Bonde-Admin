@@ -1,12 +1,13 @@
 "use client";
 
-import { Bell, Check, CheckCheck } from "lucide-react";
-import { useState } from "react";
+import { Bell, Check, CheckCheck, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/data/state";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,14 +28,26 @@ export function NotificationsMenu() {
   const [open, setOpen] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
   const { data, error, loading, refresh } = useApi(() => {
-    const query: Parameters<typeof listNotifications>[0] = {
+    const params: Parameters<typeof listNotifications>[0] = {
       pageSize: PAGE_SIZE,
       page,
     };
-    if (unreadOnly) query.filter = "status:UNREAD";
-    return listNotifications(query);
-  }, [page, unreadOnly]);
+    if (unreadOnly) params.filter = "status:UNREAD";
+    if (query) params.q = query;
+    return listNotifications(params);
+  }, [page, unreadOnly, query]);
+
+  // Debounce so each keystroke does not hit the list endpoint.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQuery(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
   const { data: unreadTotal, refresh: refreshUnread } = useApi(
     countUnreadNotifications,
     [],
@@ -116,6 +129,17 @@ export function NotificationsMenu() {
             ) : null}
           </div>
         </div>
+        <div className="border-b px-4 py-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search notifications…"
+              className="h-8 pl-8 text-sm"
+            />
+          </div>
+        </div>
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
             <div className="flex flex-col items-center gap-3 py-10">
@@ -144,7 +168,11 @@ export function NotificationsMenu() {
             <div className="p-4">
               <EmptyState
                 title="You're all caught up"
-                description="No notifications right now."
+                description={
+                  query
+                    ? `No notifications match "${query}".`
+                    : "No notifications right now."
+                }
               />
             </div>
           ) : (

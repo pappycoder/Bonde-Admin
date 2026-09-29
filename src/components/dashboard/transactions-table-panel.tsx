@@ -145,7 +145,10 @@ export function TransactionsTablePanel({
               description="Try a different search or status filter."
             />
           ) : (
-            <TransactionsTable transactions={transactions} />
+            <TransactionsTable
+              transactions={transactions}
+              onChanged={() => void refresh()}
+            />
           )}
         </CardContent>
       </Card>

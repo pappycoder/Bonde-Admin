@@ -45,6 +45,14 @@ const STATUS_VARIANT: Record<
   expired: "outline",
 };
 
+const STATUS_OPTIONS: { value: InviteStatus | "all"; label: string }[] = [
+  { value: "all", label: "All invitations" },
+  { value: "pending", label: "Pending" },
+  { value: "accepted", label: "Accepted" },
+  { value: "revoked", label: "Revoked" },
+  { value: "expired", label: "Expired" },
+];
+
 function messageOf(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback;
 }
@@ -55,14 +63,22 @@ function messageOf(error: unknown, fallback: string): string {
  * by re-inviting the address (which replaces the live link).
  */
 export function InviteTeamCard() {
+  const [status, setStatus] = useState<InviteStatus | "all">("pending");
   const {
     data,
     error: listError,
     loading: listLoading,
     refresh: loadInvites,
   } = useApi<ApiList<Invite>>(
-    useCallback(() => listInvites({ pageSize: 20, status: "pending" }), []),
-    [],
+    useCallback(
+      () =>
+        listInvites({
+          pageSize: 20,
+          status: status === "all" ? undefined : status,
+        }),
+      [status],
+    ),
+    [status],
   );
 
   const [email, setEmail] = useState("");
@@ -111,7 +127,7 @@ export function InviteTeamCard() {
     }
   };
 
-  const pending = data?.items ?? [];
+  const invites = data?.items ?? [];
 
   return (
     <Card>
@@ -184,19 +200,36 @@ export function InviteTeamCard() {
       </CardFooter>
 
       <CardContent className="border-t pt-4">
-        <p className="mb-3 text-sm font-medium">Pending invitations</p>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <p className="text-sm font-medium">Invitations</p>
+          <Select
+            value={status}
+            onValueChange={(value) => setStatus(value as InviteStatus | "all")}
+          >
+            <SelectTrigger size="sm" className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {listLoading ? (
           <LoadingState label="Loading invitations…" className="py-6" />
         ) : listError ? (
           <ErrorState message={listError.message} onRetry={loadInvites} />
-        ) : pending.length === 0 ? (
+        ) : invites.length === 0 ? (
           <EmptyState
-            title="No pending invitations"
+            title={`No ${status === "all" ? "" : status} invitations`}
             description="Invites you send will show up here until they are accepted, revoked or expire."
           />
         ) : (
           <ul className="space-y-2">
-            {pending.map((invite) => (
+            {invites.map((invite) => (
               <li
                 key={invite.id}
                 className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
@@ -215,17 +248,19 @@ export function InviteTeamCard() {
                     {invite.status === "pending" ? <Mail /> : null}
                     {invite.status}
                   </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={revokingId === invite.id}
-                    onClick={() => handleRevoke(invite)}
-                  >
-                    {revokingId === invite.id ? (
-                      <Loader2 className="animate-spin" />
-                    ) : null}
-                    Revoke
-                  </Button>
+                  {invite.status === "pending" ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={revokingId === invite.id}
+                      onClick={() => handleRevoke(invite)}
+                    >
+                      {revokingId === invite.id ? (
+                        <Loader2 className="animate-spin" />
+                      ) : null}
+                      Revoke
+                    </Button>
+                  ) : null}
                 </div>
               </li>
             ))}
