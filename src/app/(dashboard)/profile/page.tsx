@@ -174,7 +174,14 @@ export default function ProfilePage() {
                 <LoadingState label="Loading profile…" />
               </CardContent>
             ) : (
-              <form onSubmit={(event) => void handleProfile(event)}>
+              <form
+                onSubmit={(event) => void handleProfile(event)}
+                // Card is a flex column with gap-6, but a <form> wrapper
+                // collapses content + footer into one flex child, so the
+                // card's gap stops applying and the button sits flush against
+                // the last field. This restores the card's own rhythm.
+                className="flex flex-col gap-6"
+              >
                 <CardContent className="space-y-4">
                   <div className="flex items-start gap-4">
                     <div className="relative">

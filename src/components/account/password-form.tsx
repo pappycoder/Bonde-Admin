@@ -83,6 +83,9 @@ export function PasswordForm() {
         onSubmit={(event) => {
           void handleSubmit(event);
         }}
+        // See the profile page: the card's gap-6 does not reach inside a <form>
+        // wrapper, so the submit button would sit flush under the last field.
+        className="flex flex-col gap-6"
       >
         <CardContent className="space-y-4">
           <div className="space-y-2">

@@ -52,6 +52,11 @@ export function SupportTicketsTable({ tickets }: { tickets: AdminSupportTicket[]
           <motion.tr
             key={ticket.id}
             data-slot="table-row"
+            // `relative` anchors the subject link's stretched overlay, so the
+            // whole row is the hit target. The hover/focus classes mirror
+            // TableRow in ui/table.tsx, which these rows bypass because motion
+            // owns the element.
+            className="relative cursor-pointer transition-colors hover:bg-muted/50 focus-within:bg-muted/50"
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
@@ -62,12 +67,7 @@ export function SupportTicketsTable({ tickets }: { tickets: AdminSupportTicket[]
             }}
           >
             <TableCell className="font-medium tabular-nums">
-              <Link
-                href={`/support/${encodeURIComponent(ticket.id)}`}
-                className="underline-offset-4 hover:underline"
-              >
-                {shortId(ticket.id)}
-              </Link>
+              {shortId(ticket.id)}
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2.5">
@@ -85,9 +85,15 @@ export function SupportTicketsTable({ tickets }: { tickets: AdminSupportTicket[]
               <div className="flex flex-col">
                 <Link
                   href={`/support/${encodeURIComponent(ticket.id)}`}
-                  className="max-w-64 truncate font-medium underline-offset-4 hover:underline"
+                  // The overlay stretches the link over the entire row.
+                  // Truncation has to stay on an inner span: on the anchor
+                  // `truncate` sets overflow:hidden, which would clip the
+                  // overlay back down to the subject text.
+                  className="after:absolute after:inset-0"
                 >
-                  {ticket.subject}
+                  <span className="max-w-64 truncate font-medium">
+                    {ticket.subject}
+                  </span>
                 </Link>
                 <span className="text-xs text-muted-foreground">
                   Updated {timeAgo(ticket.updatedAt)}
