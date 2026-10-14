@@ -4,7 +4,9 @@ import {
   LayoutDashboard,
   LifeBuoy,
   ListChecks,
+  Mail,
   Settings,
+  UserPlus,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -50,6 +52,13 @@ export const navGroups: NavGroup[] = [
         icon: LifeBuoy,
         badgeKey: "openTickets",
       },
+    ],
+  },
+  {
+    label: "Marketing",
+    items: [
+      { title: "Waitlist", href: "/waitlist", icon: UserPlus },
+      { title: "Contacts", href: "/contacts", icon: Mail },
     ],
   },
   {
