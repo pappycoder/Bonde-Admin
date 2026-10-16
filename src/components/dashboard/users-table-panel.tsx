@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ExportMenu } from "@/components/data/export-menu";
 import { useList } from "@/hooks/use-list";
 import type { AdminUser, AdminUserStatus } from "@/lib/api/admin";
 
@@ -56,7 +57,7 @@ export function UsersTablePanel({
   const [status, setStatus] = useState<AdminUserStatus | "all">("all");
   const [emailVerified, setEmailVerified] = useState<VerifiedFilter>("all");
   const [phoneVerified, setPhoneVerified] = useState<VerifiedFilter>("all");
-  const { data, error, loading, setQuery, setPage, refresh } =
+  const { data, error, loading, query, setQuery, setPage, refresh } =
     useList<AdminUser>("/admin/users", { pageSize: 20 });
 
   const applySearch = (value: string) => {
@@ -176,11 +177,19 @@ export function UsersTablePanel({
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          {description ? (
-            <CardDescription>{description}</CardDescription>
-          ) : null}
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle>{title}</CardTitle>
+            {description ? (
+              <CardDescription>{description}</CardDescription>
+            ) : null}
+          </div>
+          <ExportMenu
+            path="/admin/users"
+            title="Users"
+            query={query}
+            disabled={loading || !!error || !data?.total}
+          />
         </CardHeader>
         <CardContent>
           {loading && !data ? (

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ExportMenu } from "@/components/data/export-menu";
 import { useList } from "@/hooks/use-list";
 import type { AdminSupportTicket, SupportTicketStatus } from "@/lib/api/admin";
 
@@ -34,7 +35,7 @@ export function SupportTicketsTablePanel({
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<SupportTicketStatus | "all">("all");
-  const { data, error, loading, setQuery, setPage, refresh } = useList<AdminSupportTicket>(
+  const { data, error, loading, query, setQuery, setPage, refresh } = useList<AdminSupportTicket>(
     "/admin/support-tickets",
     { pageSize: 20 },
   );
@@ -94,9 +95,17 @@ export function SupportTicketsTablePanel({
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle>{title}</CardTitle>
+            {description ? <CardDescription>{description}</CardDescription> : null}
+          </div>
+          <ExportMenu
+            path="/admin/support-tickets"
+            title="Support tickets"
+            query={query}
+            disabled={loading || !!error || !data?.total}
+          />
         </CardHeader>
         <CardContent>
           {loading && !data ? (

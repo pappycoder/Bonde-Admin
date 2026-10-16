@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   icons: {
-    icon: "/bonde-icon.png",
+    icon: siteConfig.icon,
   },
 };
 

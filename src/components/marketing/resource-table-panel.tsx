@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ExportMenu } from "@/components/data/export-menu";
 import { useList } from "@/hooks/use-list";
 
 export interface Column<T> {
@@ -55,7 +56,7 @@ export function ResourceTablePanel<T extends { id: string }>({
   columns,
 }: ResourceTablePanelProps<T>) {
   const [search, setSearch] = useState("");
-  const { data, error, loading, setQuery, setPage, refresh } = useList<T>(path, {
+  const { data, error, loading, query, setQuery, setPage, refresh } = useList<T>(path, {
     pageSize: 20,
   });
 
@@ -92,9 +93,17 @@ export function ResourceTablePanel<T extends { id: string }>({
       </form>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle>{title}</CardTitle>
+            {description ? <CardDescription>{description}</CardDescription> : null}
+          </div>
+          <ExportMenu
+            path={path}
+            title={title}
+            query={query}
+            disabled={loading || !!error || !data?.total}
+          />
         </CardHeader>
         <CardContent>
           {loading && !data ? (

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ExportMenu } from "@/components/data/export-menu";
 import { useList } from "@/hooks/use-list";
 import { useAdminUserNames } from "@/lib/api/admin";
 import { toActivityItems, type AdminAuditLog } from "@/lib/api/audit-logs";
@@ -51,7 +52,7 @@ export function ActivityLogPanel() {
   const [entityType, setEntityType] = useState("all");
   const [action, setAction] = useState("");
   const [actionQuery, setActionQuery] = useState("");
-  const { data, error, loading, setQuery, setPage, refresh } =
+  const { data, error, loading, query, setQuery, setPage, refresh } =
     useList<AdminAuditLog>("/admin/audit-logs", { pageSize: 20 });
   const names = useAdminUserNames(
     (data?.items ?? [])
@@ -117,6 +118,12 @@ export function ActivityLogPanel() {
           </Button>
         </form>
         <div className="flex flex-wrap items-center gap-2">
+          <ExportMenu
+            path="/admin/audit-logs"
+            title="Activity log"
+            query={query}
+            disabled={loading || !!error || !data?.total}
+          />
           <Select
             value={entityType}
             onValueChange={(value) => applyFilters({ entityType: value })}

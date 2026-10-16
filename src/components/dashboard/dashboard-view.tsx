@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { ExportMenu } from "@/components/data/export-menu";
 
 import {
   ArrowLeftRight,
@@ -25,9 +25,7 @@ import { ErrorState, LoadingState } from "@/components/data/state";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Stagger } from "@/components/motion/stagger";
-import { Button } from "@/components/ui/button";
 import { useAdminStats } from "@/lib/api/admin";
-import { downloadCsv, toCsv } from "@/lib/csv";
 import { formatMoney } from "@/lib/format";
 
 function pctDelta(current: number, previous: number) {
@@ -46,26 +44,6 @@ export function DashboardView() {
   const windowed = data?.windowTotals;
   const period = periodLabel(days);
 
-  // The series already in memory are the report; no server round trip needed.
-  const exportReport = () => {
-    if (!data) return;
-    const csv = toCsv(
-      ["Period", "Deposits", "Payouts", "Volume", "Transactions"],
-      data.series.map((point) => [
-        point.label,
-        Number(point.revenue),
-        Number(point.expenses),
-        Number(point.volume),
-        point.transactions,
-      ]),
-    );
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadCsv(`bonde-report-${stamp}.csv`, csv);
-    toast.success("Report exported", {
-      description: `Volume, deposits and payouts for the ${periodLabel(days)}.`,
-    });
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <FadeIn>
@@ -75,9 +53,12 @@ export function DashboardView() {
         >
           <div className="flex items-center gap-2">
             <PeriodSelect value={days} onChange={setDays} />
-            <Button size="sm" onClick={exportReport} disabled={!data}>
-              Export report
-            </Button>
+            <ExportMenu disabled={!data || loading} report={{
+              title: "Platform report",
+              headers: ["Period", "Deposits", "Payouts", "Volume", "Transactions"],
+              rows: (data?.series ?? []).map((point) => [point.label, point.revenue, point.expenses, point.volume, point.transactions]),
+              scope: data ? `${data.window.from} to ${data.window.to}` : period,
+            }} />
           </div>
         </PageHeader>
       </FadeIn>

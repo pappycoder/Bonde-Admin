@@ -6,7 +6,7 @@ export const siteConfig = {
     "Admin console for Bonde — monitor users, live sessions, transactions, activities and support for the Bonde AI fintech platform.",
   url: "https://bonde.app",
   logo: "/bonde-logo.png",
-  icon: "/bonde-icon.png",
+  icon: "/bonde-logo.png",
   user: {
     name: "Bonde Admin",
     email: "admin@bonde.app",

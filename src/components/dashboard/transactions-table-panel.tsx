@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ExportMenu } from "@/components/data/export-menu";
 import { useList } from "@/hooks/use-list";
 import type { AdminTransaction, AdminTxStatus } from "@/lib/api/admin";
 
@@ -92,7 +93,7 @@ export function TransactionsTablePanel({
   const [status, setStatus] =
     useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
   const [filters, setFilters] = useState<TxFilters>(NO_FILTERS);
-  const { data, error, loading, setQuery, setPage, refresh } =
+  const { data, error, loading, query, setQuery, setPage, refresh } =
     useList<AdminTransaction>("/admin/transactions", { pageSize });
 
   const applyFilters = (patch: Partial<TxFilters>) => {
@@ -216,21 +217,29 @@ export function TransactionsTablePanel({
       ) : null}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <CardTitle>{title}</CardTitle>
             {description ? (
               <CardDescription>{description}</CardDescription>
             ) : null}
           </div>
-          {showViewAll ? (
-            <Button variant="ghost" size="sm" className="gap-1" asChild>
-              <Link href="/transactions">
-                View all
-                <ArrowUpRight className="size-3.5" />
-              </Link>
-            </Button>
-          ) : null}
+          <div className="flex items-center gap-2">
+            <ExportMenu
+              path="/admin/transactions"
+              title="Transactions"
+              query={query}
+              disabled={loading || !!error || !data?.total}
+            />
+            {showViewAll ? (
+              <Button variant="ghost" size="sm" className="gap-1" asChild>
+                <Link href="/transactions">
+                  View all
+                  <ArrowUpRight className="size-3.5" />
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </CardHeader>
         <CardContent>
           {loading && !data ? (
