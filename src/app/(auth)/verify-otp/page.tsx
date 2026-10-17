@@ -76,7 +76,7 @@ function VerifyOtpForm() {
     try {
       await forgotPassword(email);
       toast.success("Code resent", {
-        description: `A new code was sent to ${email}.`,
+        description: "If this email belongs to a Bonde account, you’ll receive a new code. Check your spam folder too.",
       });
     } catch (err) {
       setError(errorOf(err));

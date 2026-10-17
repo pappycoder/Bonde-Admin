@@ -23,11 +23,12 @@ export default function ForgotPasswordPage() {
     setError(null);
     setLoading(true);
     try {
-      await forgotPassword(email);
-      toast.success("Reset code sent", {
-        description: `Check ${email} for a 4-digit reset code.`,
+      const normalizedEmail = email.trim().toLowerCase();
+      await forgotPassword(normalizedEmail);
+      toast.success("Check your email", {
+        description: "If this email belongs to a Bonde account, you’ll receive a 4-digit reset code. Check your spam folder too.",
       });
-      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+      router.push(`/verify-otp?email=${encodeURIComponent(normalizedEmail)}`);
     } catch (err) {
       setLoading(false);
       if (err instanceof ApiError && err.status === 429) {
