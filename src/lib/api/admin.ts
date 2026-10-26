@@ -79,7 +79,6 @@ export interface AdminTransactionDetail extends AdminTransaction {
 
 export type AdminUserNames = Record<string, string>;
 
-export type AdminReviewStatus = "APPROVED" | "DECLINED";
 
 export interface AdminStatsSeriesPoint {
   /** Day label ("Sep 12") for short windows, month + year ("Sep 26") for long. */
@@ -311,19 +310,6 @@ export function getAdminTransaction(
     {
       auth: true,
     },
-  );
-}
-
-/** Records an admin approval/decline on an in-flight transaction. */
-export function reviewAdminTransaction(
-  id: string,
-  status: AdminReviewStatus,
-  notes?: string,
-): Promise<AdminTransactionDetail> {
-  return api.post<AdminTransactionDetail>(
-    `/admin/transactions/${encodeURIComponent(id)}/approval`,
-    notes ? { status, notes } : { status },
-    { auth: true },
   );
 }
 

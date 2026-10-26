@@ -11,6 +11,7 @@ type Inbox = { id: string; provider: string; eventType: string; status: string; 
 type Snapshot = {
   capabilities: { enabled: boolean; configured: boolean; environment: string; currencies: Record<string, { enabled: boolean }> };
   operations: Operation[];
+  authorizations: {id: string; userId: string; cardId: string; amount: string; currency: string; merchantName: string; status: string}[];
   inbox: Inbox[];
   accounts: { currency: string; kind: string; _sum: { balance: string } }[];
   differences: { key: string; difference: string }[];
@@ -76,6 +77,11 @@ export default function FinancePage() {
         <table className="w-full text-left text-sm"><thead><tr><th className="p-2">Reference</th><th>Action</th><th>Amount</th><th>Status</th><th>Updated</th></tr></thead><tbody>
           {snapshot.operations.map(op => <tr key={op.id} className="border-t"><td className="p-2 font-mono">{op.id}</td><td>{op.kind}</td><td>{op.amount} {op.currency}</td><td>{op.status}</td><td>{new Date(op.updatedAt).toLocaleString()}</td></tr>)}
         </tbody></table>{!snapshot.operations.length && <p>No operations yet.</p>}
+      </CardContent></Card>
+      <Card><CardHeader><CardTitle>Customer purchase approvals</CardTitle></CardHeader><CardContent>
+        <p className="mb-3 text-sm text-muted-foreground">These purchases await customer approval in the app. Approval permits one matching merchant retry.</p>
+        {(snapshot.authorizations ?? []).map(authorization => <p key={authorization.id} className="py-2 border-t">{authorization.merchantName} · {authorization.amount} {authorization.currency} · {authorization.status}<br /><span className="font-mono text-xs">Customer: {authorization.userId} · Request: {authorization.id}</span></p>)}
+        {!snapshot.authorizations?.length && <p>No purchases awaiting customer approval.</p>}
       </CardContent></Card>
       <Card><CardHeader><CardTitle>Events requiring attention</CardTitle></CardHeader><CardContent>
         {snapshot.inbox.map(event => <p key={event.id}>{event.provider} · {event.eventType} · {event.status} · {event.errorCode} <Button variant="outline" size="sm" disabled={busy} onClick={() => void retry(`/admin/finance/inbox/${event.id}/retry`)}>Retry verification</Button></p>)}
