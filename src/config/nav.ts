@@ -45,6 +45,7 @@ export const navGroups: NavGroup[] = [
         icon: ArrowLeftRight,
         badgeKey: "pendingReviews",
       },
+      { title: "Financial operations", href: "/finance", icon: ArrowLeftRight },
       { title: "Activities", href: "/activities", icon: ListChecks },
       {
         title: "Support",
