@@ -257,7 +257,6 @@ export function TransactionsTablePanel({
           ) : (
             <TransactionsTable
               transactions={transactions}
-              onChanged={() => void refresh()}
             />
           )}
         </CardContent>

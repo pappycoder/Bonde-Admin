@@ -135,9 +135,9 @@ export function DashboardView() {
               icon={<ArrowLeftRight className="size-4" />}
             />
             <StatCard
-              title="Pending reviews"
+              title="Customer approvals"
               value={data.totals.pendingReviews.toLocaleString()}
-              sublabel="awaiting approval"
+              sublabel="awaiting customer action"
               icon={<ClipboardCheck className="size-4" />}
             />
             <StatCard
