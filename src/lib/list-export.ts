@@ -14,7 +14,7 @@ const fields: Record<string, [string, string][]> = {
   "/admin/transactions": [["id", "Reference"], ["user", "User"], ["userEmail", "Email"], ["type", "Type"], ["status", "Status"], ["amount", "Amount"], ["currency", "Currency"], ["method", "Method"], ["createdAt", "Created (UTC)"]],
   "/admin/support-tickets": [["id", "Ticket ID"], ["subject", "Subject"], ["user", "User"], ["userEmail", "Email"], ["status", "Status"], ["priority", "Priority"], ["assignee", "Assignee"], ["createdAt", "Created (UTC)"]],
   "/admin/audit-logs": [["id", "Event ID"], ["userId", "Actor ID"], ["action", "Action"], ["entityType", "Entity type"], ["entityId", "Entity ID"], ["ipAddress", "IP address"], ["createdAt", "Created (UTC)"]],
-  "/admin/waitlist": [["email", "Email"], ["name", "Name"], ["source", "Source"], ["createdAt", "Joined (UTC)"]],
+  "/admin/waitlist": [["email", "Email"], ["firstName", "First name"], ["lastName", "Last name"], ["phone", "Phone"], ["name", "Name (legacy)"], ["source", "Source"], ["createdAt", "Joined (UTC)"]],
   "/admin/contacts": [["name", "Name"], ["email", "Email"], ["subject", "Subject"], ["message", "Message"], ["createdAt", "Received (UTC)"]],
 };
 

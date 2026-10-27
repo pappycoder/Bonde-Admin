@@ -8,6 +8,9 @@ import { api, type ApiList, type ListQuery } from "@/lib/api-client";
 export interface WaitlistSignup {
   id: string;
   email: string;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
   name: string | null;
   source: string | null;
   createdAt: string;
@@ -22,10 +25,14 @@ export interface ContactMessage {
   createdAt: string;
 }
 
-export function listWaitlist(query?: ListQuery): Promise<ApiList<WaitlistSignup>> {
+export function listWaitlist(
+  query?: ListQuery,
+): Promise<ApiList<WaitlistSignup>> {
   return api.list<WaitlistSignup>("/admin/waitlist", query);
 }
 
-export function listContacts(query?: ListQuery): Promise<ApiList<ContactMessage>> {
+export function listContacts(
+  query?: ListQuery,
+): Promise<ApiList<ContactMessage>> {
   return api.list<ContactMessage>("/admin/contacts", query);
 }

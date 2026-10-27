@@ -14,8 +14,22 @@ const columns: Column<WaitlistSignup>[] = [
     cell: (row) => <span className="font-medium">{row.email}</span>,
   },
   {
-    header: "Name",
-    cell: (row) => row.name || <span className="text-muted-foreground">—</span>,
+    header: "First name",
+    cell: (row) =>
+      row.firstName ||
+      (!row.lastName && row.name) || (
+        <span className="text-muted-foreground">—</span>
+      ),
+  },
+  {
+    header: "Last name",
+    cell: (row) =>
+      row.lastName || <span className="text-muted-foreground">—</span>,
+  },
+  {
+    header: "Phone",
+    cell: (row) =>
+      row.phone || <span className="text-muted-foreground">—</span>,
   },
   {
     header: "Source",
@@ -43,7 +57,7 @@ export function WaitlistTablePanel() {
       path="/admin/waitlist"
       title="Waitlist signups"
       description="Everyone who asked for early access from the website."
-      searchPlaceholder="Search email or name…"
+      searchPlaceholder="Search email, name or phone…"
       emptyTitle="No signups yet"
       emptyDescription="Waitlist signups from the website will appear here."
       columns={columns}
