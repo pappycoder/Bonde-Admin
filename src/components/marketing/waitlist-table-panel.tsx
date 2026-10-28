@@ -56,6 +56,7 @@ export function WaitlistTablePanel() {
     <ResourceTablePanel<WaitlistSignup>
       path="/admin/waitlist"
       title="Waitlist signups"
+      countLabel="signups"
       description="Everyone who asked for early access from the website."
       searchPlaceholder="Search email, name or phone…"
       emptyTitle="No signups yet"

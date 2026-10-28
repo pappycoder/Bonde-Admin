@@ -49,6 +49,7 @@ type ResourceTablePanelProps<T extends { id: string }> = {
   path: string;
   title: string;
   description?: string;
+  countLabel?: string;
   searchPlaceholder: string;
   emptyTitle: string;
   emptyDescription?: string;
@@ -66,6 +67,7 @@ export function ResourceTablePanel<T extends { id: string }>({
   path,
   title,
   description,
+  countLabel,
   searchPlaceholder,
   emptyTitle,
   emptyDescription,
@@ -163,6 +165,12 @@ export function ResourceTablePanel<T extends { id: string }>({
             <CardTitle>{title}</CardTitle>
             {description ? (
               <CardDescription>{description}</CardDescription>
+            ) : null}
+            {countLabel ? (
+              <p className="text-sm font-medium" aria-live="polite">
+                {query.q ? "Matching" : "Total"} {countLabel}:{" "}
+                {data ? data.total.toLocaleString() : "—"}
+              </p>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
