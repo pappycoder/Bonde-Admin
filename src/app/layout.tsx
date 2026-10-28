@@ -19,6 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.fullName,
     template: `%s · ${siteConfig.fullName}`,
@@ -26,6 +27,19 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   icons: {
     icon: siteConfig.icon,
+  },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.fullName,
+    title: siteConfig.fullName,
+    description: siteConfig.description,
+    images: [{ url: siteConfig.icon, width: 512, height: 512, alt: "Bonde" }],
+  },
+  twitter: {
+    card: "summary",
+    title: siteConfig.fullName,
+    description: siteConfig.description,
+    images: [siteConfig.icon],
   },
 };
 
