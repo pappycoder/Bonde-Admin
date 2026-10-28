@@ -19,6 +19,7 @@ import {
 
 import { EmptyState, ErrorState, LoadingState } from "@/components/data/state";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -162,15 +163,20 @@ export function ResourceTablePanel<T extends { id: string }>({
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
-            <CardTitle>{title}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              {title}
+              {countLabel ? (
+                <Badge
+                  variant="secondary"
+                  aria-live="polite"
+                  aria-label={`${query.q ? "Matching" : "Total"} ${countLabel}: ${data ? data.total.toLocaleString() : "Loading"}`}
+                >
+                  {data ? data.total.toLocaleString() : "—"}
+                </Badge>
+              ) : null}
+            </CardTitle>
             {description ? (
               <CardDescription>{description}</CardDescription>
-            ) : null}
-            {countLabel ? (
-              <p className="text-sm font-medium" aria-live="polite">
-                {query.q ? "Matching" : "Total"} {countLabel}:{" "}
-                {data ? data.total.toLocaleString() : "—"}
-              </p>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
