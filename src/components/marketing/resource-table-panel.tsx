@@ -109,7 +109,7 @@ export function ResourceTablePanel<T extends { id: string }>({
     if (deleting || !pendingDelete.length) return;
     setDeleting(true);
     const results = await Promise.allSettled(
-      pendingDelete.map((row) => api.delete(`${path}/${row.id}`)),
+      pendingDelete.map((row) => api.delete(`${path}/${row.id}`, { auth: true })),
     );
     const failed = pendingDelete.filter(
       (_, index) => results[index].status === "rejected",
