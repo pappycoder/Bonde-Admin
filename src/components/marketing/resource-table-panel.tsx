@@ -167,7 +167,7 @@ export function ResourceTablePanel<T extends { id: string }>({
               {title}
               {countLabel ? (
                 <Badge
-                  variant="secondary"
+                  variant="default"
                   aria-live="polite"
                   aria-label={`${query.q ? "Matching" : "Total"} ${countLabel}: ${data ? data.total.toLocaleString() : "Loading"}`}
                 >
