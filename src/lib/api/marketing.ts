@@ -1,9 +1,8 @@
 import { api, type ApiList, type ListQuery } from "@/lib/api-client";
 
 /**
- * Read-only admin surface for the public website's two write-only resources.
- * Both are registry `list`/`get` resources (`waitlist`, `contacts`) — there is
- * no create/update/delete on this side.
+ * Admin lists for the public website's resources.
+ * Waitlist records also support deletion through the registry API.
  */
 export interface WaitlistSignup {
   id: string;

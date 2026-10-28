@@ -50,7 +50,7 @@ const columns: Column<WaitlistSignup>[] = [
   },
 ];
 
-/** Read-only list of website waitlist signups. */
+/** Website waitlist signups with confirmed single and bulk deletion. */
 export function WaitlistTablePanel() {
   return (
     <ResourceTablePanel<WaitlistSignup>
@@ -61,6 +61,8 @@ export function WaitlistTablePanel() {
       emptyTitle="No signups yet"
       emptyDescription="Waitlist signups from the website will appear here."
       columns={columns}
+      deletable
+      recordLabel={(row) => row.email}
     />
   );
 }
