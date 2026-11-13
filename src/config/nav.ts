@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   BarChart3,
+  BrainCircuit,
   LayoutDashboard,
   LifeBuoy,
   ListChecks,
@@ -33,6 +34,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Analytics", href: "/analytics", icon: BarChart3 },
+      { title: "AI usage", href: "/ai-usage", icon: BrainCircuit },
     ],
   },
   {

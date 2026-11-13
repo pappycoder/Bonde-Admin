@@ -162,6 +162,9 @@ export function UserDetailView({ userId }: { userId: string }) {
             All users
           </Link>
         </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/ai-usage?userId=${userId}`}>AI usage and credits</Link>
+        </Button>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
