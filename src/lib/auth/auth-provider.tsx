@@ -12,8 +12,10 @@ import {
   type MfaChallenge,
 } from "@/lib/auth/auth-api";
 import { logoutSession } from "@/lib/api/security";
+import { ApiError } from "@/lib/api-client";
 import {
   clearSession,
+  getSessionEpoch,
   loadSession,
   saveSession,
   type Session,
@@ -59,11 +61,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) setLoading(false);
         return;
       }
+      const epoch = getSessionEpoch();
       try {
         const principal = await fetchMe();
-        if (!cancelled) setUser(toAuthUser(principal));
-      } catch {
-        clearSession();
+        if (!cancelled && epoch === getSessionEpoch())
+          setUser(toAuthUser(principal));
+      } catch (error) {
+        if (cancelled || epoch !== getSessionEpoch()) return;
+        if (
+          error instanceof ApiError &&
+          [400, 401, 403].includes(error.status)
+        ) {
+          clearSession();
+        }
         if (!cancelled) setUser(null);
       } finally {
         if (!cancelled) setLoading(false);
@@ -80,10 +90,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const adoptSession = React.useCallback(
     async (session: Session, remember: boolean) => {
       saveSession({ ...session, remember });
+      const epoch = getSessionEpoch();
       try {
         const principal = await fetchMe();
-        setUser(toAuthUser(principal));
+        if (epoch === getSessionEpoch()) setUser(toAuthUser(principal));
       } catch {
+        if (epoch !== getSessionEpoch()) return;
         setUser({
           id: session.user.id,
           email: session.user.email,

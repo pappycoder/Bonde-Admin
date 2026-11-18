@@ -16,6 +16,12 @@ export interface Session {
 const SESSION_KEY = "bonde.session";
 const RESET_TOKEN_KEY = "bonde.resetToken";
 const RESET_EMAIL_KEY = "bonde.resetEmail";
+let sessionEpoch = 0;
+
+/** Changes on login/logout, but remains stable across token rotation. */
+export function getSessionEpoch(): number {
+  return sessionEpoch;
+}
 
 function storageFor(remember: boolean): Storage | null {
   if (typeof window === "undefined") return null;
@@ -23,6 +29,12 @@ function storageFor(remember: boolean): Storage | null {
 }
 
 export function saveSession(next: Omit<Session, "issuedAt">): void {
+  sessionEpoch++;
+  persistSession(next);
+}
+
+function persistSession(next: Omit<Session, "issuedAt">): void {
+  if (typeof window === "undefined") return;
   const session: Session = { ...next, issuedAt: Date.now() };
   const remember = next.remember !== false;
   storageFor(remember)?.setItem(SESSION_KEY, JSON.stringify(session));
@@ -30,6 +42,22 @@ export function saveSession(next: Omit<Session, "issuedAt">): void {
     ? window.sessionStorage
     : window.localStorage;
   other?.removeItem(SESSION_KEY);
+}
+
+/** A late refresh cannot restore a logged-out or replaced session. */
+export function rotateSession(
+  next: Omit<Session, "issuedAt">,
+  expectedEpoch: number,
+  expectedRefreshToken: string,
+): boolean {
+  const current = loadSession();
+  if (
+    sessionEpoch !== expectedEpoch ||
+    current?.refreshToken !== expectedRefreshToken
+  )
+    return false;
+  persistSession({ ...next, remember: current.remember });
+  return true;
 }
 
 export function loadSession(): Session | null {
@@ -46,6 +74,7 @@ export function loadSession(): Session | null {
 }
 
 export function clearSession(): void {
+  sessionEpoch++;
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(SESSION_KEY);
   window.sessionStorage.removeItem(SESSION_KEY);

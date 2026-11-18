@@ -2,7 +2,9 @@ import {
   clearSession,
   getAccessToken,
   getRefreshToken,
-  saveSession,
+  getSessionEpoch,
+  loadSession,
+  rotateSession,
 } from "./auth/session";
 import type { Session } from "./auth/session";
 
@@ -66,14 +68,15 @@ async function apiFetch<T>(
   retried = false,
 ): Promise<T> {
   const { auth = false, headers, ...init } = options;
+  const epoch = getSessionEpoch();
+  const sentToken = auth ? getAccessToken() : null;
 
   const finalHeaders = new Headers(headers);
   if (init.body && !finalHeaders.has("content-type")) {
     finalHeaders.set("content-type", "application/json");
   }
   if (auth) {
-    const token = getAccessToken();
-    if (token) finalHeaders.set("authorization", `Bearer ${token}`);
+    if (sentToken) finalHeaders.set("authorization", `Bearer ${sentToken}`);
   }
 
   const response = await fetch(`/api${path}`, {
@@ -81,11 +84,24 @@ async function apiFetch<T>(
     headers: finalHeaders,
   });
 
+  if (auth && epoch !== getSessionEpoch()) {
+    throw new ApiError(401, "Your session changed. Please try again.");
+  }
+
   if (response.status === 401 && auth && !retried) {
-    if (await tryRefresh()) {
+    const currentToken = getAccessToken();
+    if (
+      (currentToken && currentToken !== sentToken) ||
+      (await tryRefresh(epoch))
+    ) {
+      if (epoch !== getSessionEpoch()) {
+        throw new ApiError(401, "Your session changed. Please try again.");
+      }
       return apiFetch<T>(path, options, true);
     }
-    clearSession();
+  } else if (response.status === 401 && auth && retried) {
+    // Do not clear tokens rotated by another request after this retry started.
+    if (getAccessToken() === sentToken) clearSession();
   }
 
   if (!response.ok) {
@@ -95,7 +111,11 @@ async function apiFetch<T>(
     );
   }
 
-  return (await jsonOf(response)) as T;
+  const result = await jsonOf(response);
+  if (auth && epoch !== getSessionEpoch()) {
+    throw new ApiError(401, "Your session changed. Please try again.");
+  }
+  return result as T;
 }
 
 async function jsonOf(response: Response): Promise<unknown> {
@@ -118,18 +138,68 @@ function messageOf(response: Response, body: unknown): string {
   return response.statusText || `Request failed (${response.status})`;
 }
 
-async function tryRefresh(): Promise<boolean> {
+let refreshFlight: {
+  epoch: number;
+  token: string;
+  promise: Promise<boolean>;
+} | null = null;
+
+function tryRefresh(epoch: number): Promise<boolean> {
   const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
+  if (!refreshToken) {
+    clearSession();
+    return Promise.resolve(false);
+  }
+  if (refreshFlight?.epoch === epoch && refreshFlight.token === refreshToken) {
+    return refreshFlight.promise;
+  }
+  const flight = {
+    epoch,
+    token: refreshToken,
+    promise: refreshTokens(epoch, refreshToken).finally(() => {
+      if (refreshFlight === flight) refreshFlight = null;
+    }),
+  };
+  refreshFlight = flight;
+  return flight.promise;
+}
+
+async function refreshTokens(
+  epoch: number,
+  refreshToken: string,
+): Promise<boolean> {
   try {
     const session = await apiFetch<Session>("/auth/refresh", {
       method: "POST",
       body: JSON.stringify({ refreshToken }),
     });
-    saveSession(session);
-    return true;
-  } catch {
-    return false;
+    if (
+      !session ||
+      typeof session.accessToken !== "string" ||
+      !session.accessToken ||
+      typeof session.refreshToken !== "string" ||
+      !session.refreshToken ||
+      typeof session.expiresIn !== "number" ||
+      !Number.isFinite(session.expiresIn) ||
+      session.expiresIn <= 0 ||
+      !session.user ||
+      session.user.id !== loadSession()?.user.id
+    ) {
+      throw new ApiError(
+        401,
+        "Invalid refresh response. Please sign in again.",
+      );
+    }
+    return rotateSession(session, epoch, refreshToken);
+  } catch (error) {
+    if (epoch !== getSessionEpoch() || getRefreshToken() !== refreshToken)
+      return false;
+    if (error instanceof ApiError && [400, 401, 403].includes(error.status)) {
+      clearSession();
+      return false;
+    }
+    // Temporary network/server failures do not invalidate credentials.
+    throw error;
   }
 }
 
