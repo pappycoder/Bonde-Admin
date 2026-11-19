@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+type LiquiditySnapshot = { provider: string; currency: string; accountId: string; brands: string[]; available: string | null };
+
 type Operation = { id: string; userId: string; kind: string; status: string; amount: string; currency: string; updatedAt: string; result?: {reason?: string; providerStatus?: string; providerCancellation?: string} };
 type Inbox = { id: string; provider: string; eventType: string; status: string; errorCode: string | null };
 type Catalog = {id: string; label: string; website?: string; status: string; version: number; identityIds: string[]; evidence: string[]};
@@ -29,10 +31,10 @@ export default function FinancePage() {
   const [snapshot, setSnapshot] = useState<Snapshot>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
-  const [liquidity, setLiquidity] = useState<{ provider: string; currency: string; available: string | null }[]>();
+  const [liquidity, setLiquidity] = useState<LiquiditySnapshot[]>();
   async function inspectLiquidity() {
     setBusy(true);
-    try { const value = await api.get<{snapshots: {provider: string; currency: string; available: string | null}[]}>("/admin/finance/liquidity", {auth: true}); setLiquidity(value.snapshots); }
+    try { const value = await api.get<{snapshots: LiquiditySnapshot[]}>("/admin/finance/liquidity", {auth: true}); setLiquidity(value.snapshots); }
     catch(e) {setError(e instanceof Error ? e.message : "Could not query settlement liquidity.");}
     finally {setBusy(false);}
   }
@@ -84,7 +86,7 @@ export default function FinancePage() {
       <Card><CardHeader><CardTitle>Ledger balances</CardTitle></CardHeader><CardContent>
         <p className="mb-3 text-sm text-muted-foreground">Ledger totals are accounting balances. Linked provider balances may represent the same money and must not be added together.</p>
         <Button onClick={() => void inspectLiquidity()} disabled={busy}>Check provider liquidity</Button>
-        {liquidity?.map((row) => <p key={`${row.provider}:${row.currency}`}>{row.provider} · {row.currency}: {row.available ?? "Unavailable"}</p>)}
+        {liquidity?.map((row) => <p key={`${row.provider}:${row.currency}:${row.accountId}`}>{row.provider} · {row.currency} · {row.accountId} {row.brands.length > 0 ? `(${row.brands.join(", ")})` : ""}: {row.available ?? "Unavailable"}</p>)}
         {snapshot.accounts.map(a => <p key={`${a.currency}:${a.kind}`}>{a.currency} · {a.kind}: {a._sum.balance}</p>)}
         {!snapshot.accounts.length && <p>No live entries yet.</p>}
         {snapshot.differences.map(d => <p key={d.key} role="alert" className="text-destructive">Mismatch: {d.key} · {d.difference}</p>)}
