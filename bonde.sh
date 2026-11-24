@@ -7,6 +7,16 @@ set -uo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Environment tools work without starting the app or installing its runtime.
+case "${1:-}" in
+  env:init|env:pull|env:push|env:plan|env:validate|env:export|env:github)
+    command_name="${1#env:}"; shift
+    cd "$PROJECT_DIR" || exit 1
+    exec node scripts/env-vercel.mjs "$command_name" "$@"
+    ;;
+esac
+
+
 RESET=$'\033[0m'
 BOLD=$'\033[1m'
 GREEN=$'\033[32m'
@@ -79,6 +89,7 @@ main() {
     printf '  %b  Run dev server            %b\n' "$BOLD[1]$RESET" "$DIM npm run dev$RESET"
     printf '  %b  Run production server     %b\n' "$BOLD[2]$RESET" "$DIM npm start$RESET"
     printf '  %b  Build production bundle   %b\n' "$BOLD[3]$RESET" "$DIM npm run build$RESET"
+    printf '  %b  Environment sync commands: ./bonde.sh env:pull / env:push / env:plan\n' "$BOLD[e]$RESET"
     printf '  %b  Quit\n\n' "$BOLD[q]$RESET"
     printf '%b> %b' "$GREEN" "$RESET"
     read -r choice
@@ -86,6 +97,7 @@ main() {
       1) run_dev ;;
       2) run_prod ;;
       3) build_prod ;;
+      e|E) printf 'Use ./bonde.sh env:pull --environment preview or env:push --environment preview\n' ;;
       q|Q) ok "Bye!"; exit 0 ;;
       *) warn "Invalid choice: $choice" ;;
     esac
