@@ -7,7 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:auth": "node --test tests/api-client.test.mjs"
+    "test:auth": "node --test tests/api-client.test.mjs",
+    "env:init": "node scripts/env-vercel.mjs init",
+    "env:pull": "node scripts/env-vercel.mjs pull",
+    "env:push": "node scripts/env-vercel.mjs push",
+    "env:plan": "node scripts/env-vercel.mjs plan",
+    "env:validate": "node scripts/env-vercel.mjs validate",
+    "env:export": "node scripts/env-vercel.mjs export",
+    "test:env": "node --test scripts/env-vercel.test.mjs",
+    "env:github": "node scripts/env-vercel.mjs github"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
